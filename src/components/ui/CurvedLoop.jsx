@@ -201,8 +201,11 @@ export function CurvedLoop({
     for (const node of textPathsRef.current) node.setAttribute('startOffset', value);
   });
 
+  // 🔥 THE FIX: Strictly disable scrollBoost listener on mobile/touch devices
   useEffect(() => {
-    if (!scrollBoost) return undefined;
+    const isTouchDevice = typeof window !== 'undefined' && (window.innerWidth < 768 || window.matchMedia('(pointer: coarse)').matches);
+    if (!scrollBoost || isTouchDevice) return undefined;
+    
     const positions = new Map([[window, window.scrollY]]);
     const onScroll = (event) => {
       const target = event.target instanceof Element ? event.target : window;
@@ -218,7 +221,7 @@ export function CurvedLoop({
 
   useEffect(() => {
     if (!ready) return undefined;
-    const reduceMotion = typeof window !== 'undefined' && window.matchMedia?.('(prefers-reduced-motion: reduce)').matches;
+    const reduceMotion = typeof window !== 'undefined' && (window.matchMedia?.('(prefers-reduced-motion: reduce)').matches || window.innerWidth < 768);
     let frame = 0;
     let last = 0;
     let visible = true;
@@ -425,4 +428,3 @@ export function CurvedLoop({
 }
 
 export default CurvedLoop;
-
