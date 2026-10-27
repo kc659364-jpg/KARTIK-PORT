@@ -7,9 +7,7 @@ import { scrollToSection, getWhatsAppUrl } from '@/lib/utils';
 import { prefersReducedMotion } from '@/lib/animations';
 import { InteractiveHoverButton } from '@/registry/magicui/interactive-hover-button';
 import ThemeToggler from '@/components/ui/ThemeToggler';
-import TrueFocus from '@/components/ui/TrueFocus';
 import ScrambledText from '@/components/ui/ScrambledText';
-import TextPressure from '@/components/ui/TextPressure';
 import TextType from '@/components/ui/TextType';
 import { GithubIcon, LinkedinIcon, WhatsAppIcon, FacebookIcon, InstagramIcon } from '@/components/ui/SocialIcons';
 import { useTheme } from '@/context/ThemeContext';
@@ -34,9 +32,13 @@ export default function Hero() {
   const scrollWrapperRef = useRef(null); 
 
   const { isDark } = useTheme();
-  const [isMobile, setIsMobile] = useState(false);
+  
+  // Mounted state check to prevent hydration errors and accurately block heavy JS on mobile
+  const [mounted, setMounted] = useState(false);
+  const [isMobile, setIsMobile] = useState(true); // Default true for safety
 
   useEffect(() => {
+    setMounted(true);
     const checkMobile = () => setIsMobile(window.innerWidth < 768);
     checkMobile();
     window.addEventListener('resize', checkMobile, { passive: true });
@@ -125,14 +127,17 @@ export default function Hero() {
       }`}
       suppressHydrationWarning
     >
-      <Floating3DParticles
-        color={isDark ? '#2563EB' : '#4B2E2B'}
-        quantity={isMobile ? 18 : 90}
-        size={4.5}
-        opacity={0.4}
-        drift={0.6}
-        depth={0.75}
-      />
+      {/* Heavy 3D Particles - STRICTLY BLOCKED ON MOBILE */}
+      {mounted && !isMobile && (
+        <Floating3DParticles
+          color={isDark ? '#2563EB' : '#4B2E2B'}
+          quantity={90}
+          size={4.5}
+          opacity={0.4}
+          drift={0.6}
+          depth={0.75}
+        />
+      )}
 
       <div className="container mx-auto relative z-10">
         <div className="grid grid-cols-1 lg:grid-cols-12 gap-10 lg:gap-8 items-center">
@@ -235,7 +240,6 @@ export default function Hero() {
                 Connect:
               </span>
               <div className="flex items-center gap-3">
-                {/* GitHub (Black/White depending on theme) */}
                 <a
                   href="https://github.com/kartik-chauhan"
                   target="_blank"
@@ -250,7 +254,6 @@ export default function Hero() {
                   <GithubIcon size={17} />
                 </a>
                 
-                {/* LinkedIn (#0A66C2) */}
                 <a
                   href="https://linkedin.com/in/kartik-chauhan-136306343"
                   target="_blank"
@@ -263,7 +266,6 @@ export default function Hero() {
                   <LinkedinIcon size={17} />
                 </a>
                 
-                {/* WhatsApp (#25D366) */}
                 <a
                   href={getWhatsAppUrl('+91 9737275089', 'Hi Kartik, I saw your portfolio and would like to discuss a project!')}
                   target="_blank"
@@ -276,7 +278,6 @@ export default function Hero() {
                   <WhatsAppIcon size={17} />
                 </a>
                 
-                {/* Facebook (#1877F2) */}
                 <a
                   href="https://facebook.com/"
                   target="_blank"
@@ -289,7 +290,6 @@ export default function Hero() {
                   <FacebookIcon size={17} />
                 </a>
                 
-                {/* Instagram (#E1306C) */}
                 <a
                   href="https://instagram.com/"
                   target="_blank"
@@ -313,36 +313,39 @@ export default function Hero() {
               ref={profileImageRef}
               className="relative w-full max-w-[520px] sm:max-w-[620px] lg:max-w-[950px] aspect-square z-10 flex items-center justify-center"
             >
-              <div 
-                className="absolute inset-0 z-0 pointer-events-auto scale-125"
-                style={{
-                  WebkitMaskImage: 'radial-gradient(circle, black 40%, transparent 75%)',
-                  maskImage: 'radial-gradient(circle, black 40%, transparent 75%)'
-                }}
-              >
-                <Lightning
-                  color={isDark ? '#2563EB' : '#4B2E2B'}
-                  bolts={isMobile ? 1 : (isDark ? 4 : 3)}
-                  spread={isMobile ? 0.6 : 0.9}
-                  branches={isMobile ? 0.4 : 0.8}
-                  xOffset={0}
-                  angle={0}
-                  size={isMobile ? 1.2 : 1.5}
-                  thickness={isMobile ? 1.5 : 2}
-                  glow={isMobile ? 1.5 : 2.5}
-                  intensity={1.8}
-                  speed={1.5}
-                  flicker={isMobile ? 0.4 : 0.7}
-                  mouseInteraction={!isMobile}
-                  mouseStrength={1.8}
-                  clickStrike={!isMobile}
-                  intro={true}
-                  fade={0.9}
-                  opacity={isDark ? 1 : 0.85}
-                  lightMode={!isDark}
-                  dpr={isMobile ? 1 : 2}
-                />
-              </div>
+              {/* Heavy Lightning Effect - STRICTLY BLOCKED ON MOBILE */}
+              {mounted && !isMobile && (
+                <div 
+                  className="absolute inset-0 z-0 pointer-events-auto scale-125"
+                  style={{
+                    WebkitMaskImage: 'radial-gradient(circle, black 40%, transparent 75%)',
+                    maskImage: 'radial-gradient(circle, black 40%, transparent 75%)'
+                  }}
+                >
+                  <Lightning
+                    color={isDark ? '#2563EB' : '#4B2E2B'}
+                    bolts={isDark ? 4 : 3}
+                    spread={0.9}
+                    branches={0.8}
+                    xOffset={0}
+                    angle={0}
+                    size={1.5}
+                    thickness={2}
+                    glow={2.5}
+                    intensity={1.8}
+                    speed={1.5}
+                    flicker={0.7}
+                    mouseInteraction={true}
+                    mouseStrength={1.8}
+                    clickStrike={true}
+                    intro={true}
+                    fade={0.9}
+                    opacity={isDark ? 1 : 0.85}
+                    lightMode={!isDark}
+                    dpr={2}
+                  />
+                </div>
+              )}
 
               <div 
                 className="absolute inset-0 z-10 pointer-events-none"

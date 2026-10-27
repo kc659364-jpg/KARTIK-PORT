@@ -24,9 +24,12 @@ const NAV_LINKS = [
 export default function Footer() {
   const currentYear = 2026;
   const { isDark } = useTheme();
-  const [isMobile, setIsMobile] = useState(false);
+  
+  const [mounted, setMounted] = useState(false);
+  const [isMobile, setIsMobile] = useState(true);
 
   useEffect(() => {
+    setMounted(true);
     const checkMobile = () => setIsMobile(window.innerWidth < 768);
     checkMobile();
     window.addEventListener('resize', checkMobile, { passive: true });
@@ -52,35 +55,36 @@ export default function Footer() {
       role="contentinfo"
       suppressHydrationWarning
     >
-      {/* 3D Ballpit Interactive Background */}
-      <div className="absolute inset-0 z-0 opacity-80 pointer-events-none">
-        <Ballpit
-          count={isMobile ? 28 : 130}
-          gravity={0}
-          friction={0.9975}
-          wallBounce={0.95}
-          followCursor={!isMobile}
-          colors={isDark ? DARK_BALL_COLORS : LIGHT_BALL_COLORS}
-          minSize={0.4}
-          maxSize={1.2}
-          shadows={0.6}
-          lightIntensity={1}
-          lightColor={isDark ? '#2563EB' : '#E8DCCB'}
-          exposure={1}
-          material="satin"
-          depth={2}
-          drift={0.4}
-          bounce={0.85}
-          clickEffect="burst"
-          intro={true}
-          grab={true}
-          cursorSize={1}
-        />
-      </div>
+      {/* 3D Ballpit completely bypassed on mobile */}
+      {mounted && !isMobile && (
+        <div className="absolute inset-0 z-0 opacity-80 pointer-events-none">
+          <Ballpit
+            count={130}
+            gravity={0}
+            friction={0.9975}
+            wallBounce={0.95}
+            followCursor={true}
+            colors={isDark ? DARK_BALL_COLORS : LIGHT_BALL_COLORS}
+            minSize={0.4}
+            maxSize={1.2}
+            shadows={0.6}
+            lightIntensity={1}
+            lightColor={isDark ? '#2563EB' : '#E8DCCB'}
+            exposure={1}
+            material="satin"
+            depth={2}
+            drift={0.4}
+            bounce={0.85}
+            clickEffect="burst"
+            intro={true}
+            grab={true}
+            cursorSize={1}
+          />
+        </div>
+      )}
 
       <div className="container mx-auto relative z-10 pointer-events-auto">
         <div className="grid grid-cols-1 md:grid-cols-12 gap-10 mb-16">
-          {/* Brand */}
           <div className="md:col-span-6 flex flex-col gap-4 max-w-sm">
             <button
               type="button"
@@ -97,7 +101,6 @@ export default function Footer() {
             </p>
           </div>
 
-          {/* Quick Navigation */}
           <div className="md:col-span-3">
             <h4 className="font-display text-base font-semibold text-white dark:text-[#FFFFFF] mb-4">Navigation</h4>
             <ul className="flex flex-col gap-2.5 list-none p-0 m-0">
@@ -116,7 +119,6 @@ export default function Footer() {
             </ul>
           </div>
 
-          {/* Connect */}
           <div className="md:col-span-3">
             <h4 className="font-display text-base font-semibold text-white dark:text-[#FFFFFF] mb-4">Connect</h4>
             <ul className="flex flex-col gap-3 list-none p-0 m-0">
@@ -166,7 +168,6 @@ export default function Footer() {
           </div>
         </div>
 
-        {/* Bottom bar */}
         <div className="flex flex-col sm:flex-row justify-between items-center pt-8 border-t border-[#4B2E2B] dark:border-[#1E293B] text-xs text-[#E8DCCB]/70 dark:text-[#94A3B8]/70 gap-4">
           <p>&copy; {currentYear} Kartik Chauhan. Designed &amp; Developed with Next.js, Three.js &amp; GSAP.</p>
           <button

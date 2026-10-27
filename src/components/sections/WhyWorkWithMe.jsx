@@ -81,7 +81,6 @@ function InteractiveCard({ item }) {
 
   const Icon = item.icon;
 
-  // Soft rainbow colors that look good in both light and dark modes
   const rainbowBackground = isDark 
     ? 'linear-gradient(124deg, rgba(255,0,0,0.15), rgba(255,165,0,0.15), rgba(255,255,0,0.15), rgba(0,128,0,0.15), rgba(0,0,255,0.15), rgba(75,0,130,0.15), rgba(238,130,238,0.15))'
     : 'linear-gradient(124deg, rgba(255,0,0,0.1), rgba(255,165,0,0.1), rgba(255,255,0,0.1), rgba(0,128,0,0.1), rgba(0,0,255,0.1), rgba(75,0,130,0.1), rgba(238,130,238,0.1))';
@@ -95,7 +94,6 @@ function InteractiveCard({ item }) {
       }}
       className="group relative bg-[#E8DCCB] dark:bg-[#111827] border border-[#D8C7B3] dark:border-[#1E293B] rounded-lg p-7 flex flex-col overflow-hidden transition-transform duration-200 ease-out hover:shadow-card-hover dark:hover:shadow-black/70 hover:border-[#4B2E2B]/50 dark:hover:border-[#2563EB]/50"
     >
-      {/* Rainbow Animated Background Effect on Hover */}
       <div
         className="pointer-events-none absolute inset-0 opacity-0 transition-opacity duration-500 group-hover:opacity-100"
         style={{
@@ -126,9 +124,12 @@ export default function WhyWorkWithMe() {
   const sectionRef = useRef(null);
   const gridRef = useRef(null);
   const { isDark } = useTheme();
-  const [isMobile, setIsMobile] = useState(false);
+  
+  const [mounted, setMounted] = useState(false);
+  const [isMobile, setIsMobile] = useState(true);
 
   useEffect(() => {
+    setMounted(true);
     const checkMobile = () => setIsMobile(window.innerWidth < 768);
     checkMobile();
     window.addEventListener('resize', checkMobile, { passive: true });
@@ -175,7 +176,6 @@ export default function WhyWorkWithMe() {
       ref={sectionRef}
       className="bg-[#FFFFFF] dark:bg-[#0B0F19] py-24 sm:py-32 relative border-t border-[#E8DCCB] dark:border-[#1E293B] overflow-hidden transition-colors duration-300"
     >
-      {/* Adding custom keyframes globally just for these effects */}
       <style dangerouslySetInnerHTML={{__html: `
         @keyframes rainbowTextWipe {
           0% { background-position: 0% center; }
@@ -188,22 +188,24 @@ export default function WhyWorkWithMe() {
         }
       `}} />
 
-      {/* AeroShards WebGPU Background */}
-      <div className="absolute inset-0 z-0 opacity-60">
-        <AeroShards
-          count={isMobile ? 160 : 700}
-          shardColor={isDark ? '#2563EB' : '#4B2E2B'}
-          accentColor={isDark ? '#3B82F6' : '#784C47'}
-          backgroundColor="transparent"
-          material="glass"
-          placement="full"
-          spread={1.5}
-          depthOfField={0.8}
-          lightMode={!isDark}
-          mouseInteraction={!isMobile}
-          pulseOnClick={!isMobile}
-        />
-      </div>
+      {/* AeroShards completely bypassed on mobile */}
+      {mounted && !isMobile && (
+        <div className="absolute inset-0 z-0 opacity-60">
+          <AeroShards
+            count={700}
+            shardColor={isDark ? '#2563EB' : '#4B2E2B'}
+            accentColor={isDark ? '#3B82F6' : '#784C47'}
+            backgroundColor="transparent"
+            material="glass"
+            placement="full"
+            spread={1.5}
+            depthOfField={0.8}
+            lightMode={!isDark}
+            mouseInteraction={true}
+            pulseOnClick={true}
+          />
+        </div>
+      )}
 
       <div className="container mx-auto relative z-10">
         <SectionHeading
@@ -224,18 +226,23 @@ export default function WhyWorkWithMe() {
           align="center"
         />
 
-        {/* FallingText Integration replacing the static description */}
-        <div className="w-full max-w-3xl mx-auto h-[120px] sm:h-[150px] flex items-center justify-center -mt-6 mb-12 relative z-20 cursor-pointer">
-          <FallingText
-            text="Clear communication, practical architectural decisions, and an eye for creative detail in every project."
-            highlightWords={["communication,", "practical", "creative", "detail"]}
-            trigger="hover" 
-            backgroundColor="transparent"
-            variant="text"
-            fontSize="1.1rem"
-            theme={isDark ? 'dark' : 'light'}
-            accentColor={isDark ? '#2563EB' : '#4B2E2B'}
-          />
+        <div className="w-full max-w-3xl mx-auto h-[120px] sm:h-[150px] flex items-center justify-center -mt-6 mb-12 relative z-20">
+          {mounted && !isMobile ? (
+            <FallingText
+              text="Clear communication, practical architectural decisions, and an eye for creative detail in every project."
+              highlightWords={["communication,", "practical", "creative", "detail"]}
+              trigger="hover" 
+              backgroundColor="transparent"
+              variant="text"
+              fontSize="1.1rem"
+              theme={isDark ? 'dark' : 'light'}
+              accentColor={isDark ? '#2563EB' : '#4B2E2B'}
+            />
+          ) : (
+            <p className="text-center text-sm sm:text-base text-[#5C4845] dark:text-[#94A3B8] px-4">
+              Clear <strong className="text-[#241714] dark:text-white">communication</strong>, <strong className="text-[#241714] dark:text-white">practical</strong> architectural decisions, and an eye for <strong className="text-[#241714] dark:text-white">creative detail</strong> in every project.
+            </p>
+          )}
         </div>
 
         <div ref={gridRef} className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6">

@@ -21,8 +21,11 @@ export default function Skills() {
   const marqueeRef = useRef(null);
   const { isDark } = useTheme();
   
+  const [mounted, setMounted] = useState(false);
   const [windowWidth, setWindowWidth] = useState(1200);
+
   useIsomorphicLayoutEffect(() => {
+    setMounted(true);
     setWindowWidth(window.innerWidth);
     const handleResize = () => setWindowWidth(window.innerWidth);
     window.addEventListener('resize', handleResize);
@@ -62,6 +65,8 @@ export default function Skills() {
     };
   }, []);
 
+  const isMobile = windowWidth < 768;
+
   return (
     <section
       id="skills"
@@ -70,27 +75,32 @@ export default function Skills() {
     >
       <div className="container mx-auto relative z-20">
         
-        {/* TechText Effect applied directly inside the standard SectionHeading */}
         <SectionHeading
           label="Technical Toolkit"
           title={
-            <div className="w-full max-w-[800px] mx-auto h-[50px] sm:h-[70px] lg:h-[90px] relative mt-1 mb-3">
-              <TechText
-                text="Skills & Frameworks." 
-                fontWeight={700}
-                fontSize={windowWidth < 640 ? 40 : windowWidth < 1024 ? 60 : 80} 
-                reveal="letter"
-                dashLength={4}
-                dashGap={2}
-                specks={15}
-                intro="none"
-                introDuration={2}
-                clickKick
-                guides={false}
-                color={isDark ? '#FFFFFF' : '#241714'} 
-                accentColor={isDark ? '#2563EB' : '#4B2E2B'} 
-              />
-            </div>
+            mounted && !isMobile ? (
+              <div className="w-full max-w-[800px] mx-auto h-[50px] sm:h-[70px] lg:h-[90px] relative mt-1 mb-3">
+                <TechText
+                  text="Skills & Frameworks." 
+                  fontWeight={700}
+                  fontSize={windowWidth < 1024 ? 60 : 80} 
+                  reveal="letter"
+                  dashLength={4}
+                  dashGap={2}
+                  specks={15}
+                  intro="none"
+                  introDuration={2}
+                  clickKick
+                  guides={false}
+                  color={isDark ? '#FFFFFF' : '#241714'} 
+                  accentColor={isDark ? '#2563EB' : '#4B2E2B'} 
+                />
+              </div>
+            ) : (
+              <span className="block text-3xl sm:text-4xl font-display font-bold text-[#241714] dark:text-[#FFFFFF] mt-2 mb-4">
+                Skills & Frameworks.
+              </span>
+            )
           }
           description="A continuous velocity stream of my technical stack. Hover over any skill card to explore its interactive 3D rotating Icon Cloud."
           align="center"

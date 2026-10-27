@@ -148,6 +148,7 @@ export default function Navbar() {
                         ? 'bg-[#4B2E2B] text-white dark:bg-[#2563EB] shadow-md scale-100'
                         : 'text-[#5C4845] dark:text-[#94A3B8] hover:text-[#241714] dark:hover:text-[#FFFFFF] hover:bg-[#D8C7B3]/40 dark:hover:bg-[#1E293B]/60 scale-95 hover:scale-100'
                     }`}
+                    suppressHydrationWarning
                   >
                     {link.label}
                   </button>
