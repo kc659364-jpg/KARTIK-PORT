@@ -68,32 +68,9 @@ const TechText = ({
 
   useEffect(() => {
     settingsRef.current = {
-      text,
-      fontFamily,
-      fontWeight,
-      fontSize,
-      letterSpacing,
-      color,
-      accentColor,
-      align,
-      reach,
-      softness,
-      dashLength,
-      dashGap,
-      strokeWidth,
-      lineStyle,
-      reveal,
-      specks,
-      selection,
-      labels,
-      draggable,
-      bounce,
-      sweep,
-      speed,
-      clickKick,
-      intro,
-      introDuration,
-      guides
+      text, fontFamily, fontWeight, fontSize, letterSpacing, color, accentColor, align, reach,
+      softness, dashLength, dashGap, strokeWidth, lineStyle, reveal, specks, selection, labels,
+      draggable, bounce, sweep, speed, clickKick, intro, introDuration, guides
     };
     wakeRef.current();
   });
@@ -106,7 +83,10 @@ const TechText = ({
     const scratchCtx = scratch.getContext('2d');
     if (!container || !canvas || !ctx || !scratchCtx) return undefined;
 
-    const reducedMotion = window.matchMedia?.('(prefers-reduced-motion: reduce)')?.matches;
+    // 🔥 THE FIX: Strictly detect mobile/touch to block heavy physics
+    const isTouchDevice = typeof window !== 'undefined' && (window.innerWidth < 768 || window.matchMedia('(pointer: coarse)').matches);
+    const reducedMotion = window.matchMedia?.('(prefers-reduced-motion: reduce)')?.matches || isTouchDevice;
+    
     let width = 1;
     let height = 1;
     let dpr = 1;
@@ -196,20 +176,8 @@ const TechText = ({
 
     const ensureLayout = (s, ink) => {
       const key = [
-        s.text,
-        family(s),
-        s.fontWeight,
-        s.fontSize,
-        s.letterSpacing,
-        s.align,
-        ink,
-        s.dashLength,
-        s.dashGap,
-        s.strokeWidth,
-        s.lineStyle,
-        width,
-        height,
-        dpr
+        s.text, family(s), s.fontWeight, s.fontSize, s.letterSpacing, s.align, ink,
+        s.dashLength, s.dashGap, s.strokeWidth, s.lineStyle, width, height, dpr
       ].join('|');
       if (key === layoutKey && word) return word;
       layoutKey = key;
@@ -479,10 +447,7 @@ const TechText = ({
 
       ctx.beginPath();
       for (const [cx, cy] of [
-        [x1, y1],
-        [x2, y1],
-        [x2, y2],
-        [x1, y2]
+        [x1, y1], [x2, y1], [x2, y2], [x1, y2]
       ]) {
         ctx.rect(Math.round(cx) - 2, Math.round(cy) - 2, 5, 5);
       }
@@ -940,12 +905,15 @@ const TechText = ({
       wake();
     };
 
-    container.addEventListener('pointermove', onMove, { passive: true });
-    container.addEventListener('pointerenter', onMove, { passive: true });
-    container.addEventListener('pointerdown', onDown, { passive: true });
-    container.addEventListener('pointerup', onUp, { passive: true });
-    container.addEventListener('pointercancel', onUp, { passive: true });
-    container.addEventListener('pointerleave', onLeave, { passive: true });
+    // 🔥 THE FIX: Strictly disable global pointer events on mobile
+    if (!isTouchDevice) {
+      container.addEventListener('pointermove', onMove, { passive: true });
+      container.addEventListener('pointerenter', onMove, { passive: true });
+      container.addEventListener('pointerdown', onDown, { passive: true });
+      container.addEventListener('pointerup', onUp, { passive: true });
+      container.addEventListener('pointercancel', onUp, { passive: true });
+      container.addEventListener('pointerleave', onLeave, { passive: true });
+    }
 
     const resizeObserver = new ResizeObserver(resize);
     resizeObserver.observe(container);
@@ -973,12 +941,15 @@ const TechText = ({
       themeObserver.disconnect();
       schemeQuery?.removeEventListener?.('change', wake);
       container.style.cursor = '';
-      container.removeEventListener('pointermove', onMove);
-      container.removeEventListener('pointerenter', onMove);
-      container.removeEventListener('pointerdown', onDown);
-      container.removeEventListener('pointerup', onUp);
-      container.removeEventListener('pointercancel', onUp);
-      container.removeEventListener('pointerleave', onLeave);
+      
+      if (!isTouchDevice) {
+        container.removeEventListener('pointermove', onMove);
+        container.removeEventListener('pointerenter', onMove);
+        container.removeEventListener('pointerdown', onDown);
+        container.removeEventListener('pointerup', onUp);
+        container.removeEventListener('pointercancel', onUp);
+        container.removeEventListener('pointerleave', onLeave);
+      }
     };
   }, []);
 
