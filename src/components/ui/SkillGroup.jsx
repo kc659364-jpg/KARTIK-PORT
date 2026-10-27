@@ -1,9 +1,11 @@
 'use client';
 
 import React, { useMemo, useState } from 'react';
+import dynamic from 'next/dynamic';
 import { Sparkles } from 'lucide-react';
-import { IconCloud } from '@/registry/magicui/icon-cloud';
 import { useTheme } from '@/context/ThemeContext';
+
+const IconCloud = dynamic(() => import('@/registry/magicui/icon-cloud'), { ssr: false });
 
 const SKILL_SLUG_MAP = {
   'HTML5': 'html5',

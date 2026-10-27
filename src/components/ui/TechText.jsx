@@ -877,7 +877,8 @@ const TechText = ({
     const resize = () => {
       width = Math.max(1, container.clientWidth);
       height = Math.max(1, container.clientHeight);
-      dpr = Math.min(window.devicePixelRatio || 1, 2);
+      const isMobile = typeof window !== 'undefined' && window.innerWidth < 768;
+      dpr = Math.min(window.devicePixelRatio || 1, isMobile ? 1 : 2);
       canvas.width = Math.round(width * dpr);
       canvas.height = Math.round(height * dpr);
       layoutKey = '';

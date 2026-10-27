@@ -6,6 +6,7 @@ import { ScrollTrigger } from 'gsap/ScrollTrigger';
 // Register plugins once
 if (typeof window !== 'undefined') {
   gsap.registerPlugin(ScrollTrigger);
+  ScrollTrigger.config({ limitCallbacks: true });
 }
 
 /**

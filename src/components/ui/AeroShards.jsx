@@ -1037,7 +1037,8 @@ export default function AeroShards({
       cleanups.push(instance.onError(fail));
       const format = navigator.gpu.getPreferredCanvasFormat();
       const sizeFor = () => {
-        const ratio = Math.min(window.devicePixelRatio || 1, settingsRef.current.dpr);
+        const maxDpr = typeof window !== 'undefined' && window.innerWidth < 768 ? 1 : 2;
+        const ratio = Math.min(window.devicePixelRatio || 1, Math.min(settingsRef.current.dpr, maxDpr));
         return [
           Math.max(1, Math.round(container.clientWidth * ratio)),
           Math.max(1, Math.round(container.clientHeight * ratio))

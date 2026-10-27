@@ -204,13 +204,14 @@ export default function PaperCrumple({
       return undefined;
     }
 
-    renderer.setPixelRatio(Math.min(window.devicePixelRatio || 1, 2));
+    const isMobile = typeof window !== 'undefined' && window.innerWidth < 768;
+    renderer.setPixelRatio(Math.min(window.devicePixelRatio || 1, isMobile ? 1 : 1.75));
     renderer.domElement.className = 'paper-crumple-canvas';
     renderer.domElement.setAttribute('aria-label', alt);
     container.appendChild(renderer.domElement);
 
     if (shadow) {
-      const ambient = new THREE.AmbientLight(0xffffff, 1.2); // Brightened slightly
+      const ambient = new THREE.AmbientLight(0xffffff, 1.2);
       const directional = new THREE.DirectionalLight(0xffffff, 0.4);
       directional.position.set(5, 5, 5);
       scene.add(ambient, directional);
@@ -219,7 +220,9 @@ export default function PaperCrumple({
     const aspect = width / height;
     const planeH = 3.8;
     const planeW = planeH * aspect;
-    const paperData = createPaperPath(planeW, planeH, 36, 46);
+    const cols = isMobile ? 20 : 36;
+    const rows = isMobile ? 24 : 46;
+    const paperData = createPaperPath(planeW, planeH, cols, rows);
 
     const geometry = new THREE.BufferGeometry();
     geometry.setAttribute('position', new THREE.BufferAttribute(new Float32Array(paperData.positions), 3));

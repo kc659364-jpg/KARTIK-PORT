@@ -247,7 +247,8 @@ export default function GridScan({
       return undefined;
     }
 
-    renderer.setPixelRatio(Math.min(window.devicePixelRatio || 1, 2));
+    const isMobile = typeof window !== 'undefined' && window.innerWidth < 768;
+    renderer.setPixelRatio(Math.min(window.devicePixelRatio || 1, isMobile ? 1 : 2));
     renderer.setSize(container.clientWidth || 300, container.clientHeight || 150);
     container.appendChild(renderer.domElement);
 

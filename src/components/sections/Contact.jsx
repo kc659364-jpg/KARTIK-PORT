@@ -1,13 +1,15 @@
 'use client';
 
 import { useEffect, useRef } from 'react';
+import dynamic from 'next/dynamic';
 import { Mail, Phone, MapPin, MessageSquare } from 'lucide-react';
 import ContactForm from '@/components/ui/ContactForm';
 import { GithubIcon, LinkedinIcon } from '@/components/ui/Icons';
 import { getWhatsAppUrl } from '@/lib/utils';
 import { prefersReducedMotion } from '@/lib/animations';
-import GridScan from '@/components/ui/GridScan';
 import { useTheme } from '@/context/ThemeContext';
+
+const GridScan = dynamic(() => import('@/components/ui/GridScan'), { ssr: false });
 
 export default function Contact() {
   const sectionRef = useRef(null);

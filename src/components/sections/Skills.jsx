@@ -1,6 +1,7 @@
 'use client';
 
 import { useEffect, useRef, useState, useLayoutEffect } from 'react';
+import dynamic from 'next/dynamic';
 import SectionHeading from '@/components/ui/SectionHeading';
 import SkillGroup from '@/components/ui/SkillGroup';
 import skillGroups from '@/data/skills';
@@ -9,9 +10,9 @@ import {
   ScrollVelocityContainer,
   ScrollVelocityRow,
 } from '@/registry/magicui/scroll-based-velocity';
-
-import TechText from '@/components/ui/TechText'; 
 import { useTheme } from '@/context/ThemeContext';
+
+const TechText = dynamic(() => import('@/components/ui/TechText'), { ssr: false });
 
 const useIsomorphicLayoutEffect = typeof window !== 'undefined' ? useLayoutEffect : useEffect;
 

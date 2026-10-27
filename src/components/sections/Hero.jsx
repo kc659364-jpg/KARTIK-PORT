@@ -1,12 +1,11 @@
 'use client';
 
-import { useEffect, useRef } from 'react';
+import { useEffect, useRef, useState } from 'react';
+import dynamic from 'next/dynamic';
 import Image from 'next/image';
 import { scrollToSection, getWhatsAppUrl } from '@/lib/utils';
 import { prefersReducedMotion } from '@/lib/animations';
 import { InteractiveHoverButton } from '@/registry/magicui/interactive-hover-button';
-import { Floating3DParticles } from '@/registry/magicui/floating-3d-particles';
-import Lightning from '@/components/ui/Lightning';
 import ThemeToggler from '@/components/ui/ThemeToggler';
 import TrueFocus from '@/components/ui/TrueFocus';
 import ScrambledText from '@/components/ui/ScrambledText';
@@ -14,6 +13,13 @@ import TextPressure from '@/components/ui/TextPressure';
 import TextType from '@/components/ui/TextType';
 import { GithubIcon, LinkedinIcon, WhatsAppIcon, FacebookIcon, InstagramIcon } from '@/components/ui/SocialIcons';
 import { useTheme } from '@/context/ThemeContext';
+
+const Floating3DParticles = dynamic(
+  () => import('@/registry/magicui/floating-3d-particles').then((m) => m.Floating3DParticles),
+  { ssr: false }
+);
+
+const Lightning = dynamic(() => import('@/components/ui/Lightning'), { ssr: false });
 
 export default function Hero() {
   const heroRef = useRef(null);
@@ -28,6 +34,14 @@ export default function Hero() {
   const scrollWrapperRef = useRef(null); 
 
   const { isDark } = useTheme();
+  const [isMobile, setIsMobile] = useState(false);
+
+  useEffect(() => {
+    const checkMobile = () => setIsMobile(window.innerWidth < 768);
+    checkMobile();
+    window.addEventListener('resize', checkMobile, { passive: true });
+    return () => window.removeEventListener('resize', checkMobile);
+  }, []);
 
   useEffect(() => {
     if (prefersReducedMotion()) return;
@@ -113,7 +127,7 @@ export default function Hero() {
     >
       <Floating3DParticles
         color={isDark ? '#2563EB' : '#4B2E2B'}
-        quantity={90}
+        quantity={isMobile ? 30 : 90}
         size={4.5}
         opacity={0.4}
         drift={0.6}
@@ -308,24 +322,25 @@ export default function Hero() {
               >
                 <Lightning
                   color={isDark ? '#2563EB' : '#4B2E2B'}
-                  bolts={isDark ? 4 : 3}
-                  spread={0.9}
-                  branches={0.8}
+                  bolts={isMobile ? 1 : (isDark ? 4 : 3)}
+                  spread={isMobile ? 0.6 : 0.9}
+                  branches={isMobile ? 0.4 : 0.8}
                   xOffset={0}
                   angle={0}
-                  size={1.5}
-                  thickness={2}
-                  glow={2.5}
+                  size={isMobile ? 1.2 : 1.5}
+                  thickness={isMobile ? 1.5 : 2}
+                  glow={isMobile ? 1.5 : 2.5}
                   intensity={1.8}
                   speed={1.5}
-                  flicker={0.7}
-                  mouseInteraction={true}
+                  flicker={isMobile ? 0.4 : 0.7}
+                  mouseInteraction={!isMobile}
                   mouseStrength={1.8}
-                  clickStrike={true}
+                  clickStrike={!isMobile}
                   intro={true}
                   fade={0.9}
                   opacity={isDark ? 1 : 0.85}
                   lightMode={!isDark}
+                  dpr={isMobile ? 1 : 2}
                 />
               </div>
 

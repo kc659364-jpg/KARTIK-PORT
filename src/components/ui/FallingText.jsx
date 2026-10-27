@@ -229,7 +229,8 @@ const FallingText = ({
         return { x: rect.left - originX, y: rect.top - originY, w: rect.width, h: rect.height };
       });
       block.style.minHeight = `${block.offsetHeight}px`;
-      const world = Matter.Engine.create({ enableSleeping: true, positionIterations: 10, velocityIterations: 8 });
+      const isMobile = typeof window !== 'undefined' && window.innerWidth < 768;
+      const world = Matter.Engine.create({ enableSleeping: true, positionIterations: isMobile ? 4 : 10, velocityIterations: isMobile ? 4 : 8 });
       world.gravity.y = clamp(s.gravity, -3, 4) * 1.4;
       walls = [
         Matter.Bodies.rectangle(0, 0, 10000, WALL, { isStatic: true, friction: 0.8 }),

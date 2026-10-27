@@ -50,7 +50,8 @@ export default function Ballpit({
       return undefined;
     }
 
-    renderer.setPixelRatio(Math.min(window.devicePixelRatio || 1, 2));
+    const isMobile = typeof window !== 'undefined' && window.innerWidth < 768;
+    renderer.setPixelRatio(Math.min(window.devicePixelRatio || 1, isMobile ? 1 : 1.75));
     renderer.setSize(container.clientWidth || 300, container.clientHeight || 150);
     renderer.toneMapping = THREE.ACESFilmicToneMapping;
     renderer.toneMappingExposure = exposure;
@@ -86,7 +87,7 @@ export default function Ballpit({
       envMapIntensity: shadows,
     });
 
-    const sphereGeometry = new THREE.SphereGeometry(1, 24, 24);
+    const sphereGeometry = new THREE.SphereGeometry(1, isMobile ? 14 : 24, isMobile ? 14 : 24);
     const instancedMesh = new THREE.InstancedMesh(sphereGeometry, ballMaterial, count);
     scene.add(instancedMesh);
 

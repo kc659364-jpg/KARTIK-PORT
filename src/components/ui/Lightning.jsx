@@ -409,7 +409,8 @@ const Lightning = ({
 
     const resize = () => {
       const rect = canvas.getBoundingClientRect();
-      const ratio = Math.min(settingsRef.current.dpr ?? window.devicePixelRatio ?? 1, 2);
+      const maxDpr = typeof window !== 'undefined' && window.innerWidth < 768 ? 1 : 2;
+      const ratio = Math.min(settingsRef.current.dpr ?? window.devicePixelRatio ?? 1, maxDpr);
       view.width = Math.max(1, rect.width);
       view.height = Math.max(1, rect.height);
       view.left = rect.left;

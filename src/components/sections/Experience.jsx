@@ -1,13 +1,15 @@
 'use client';
 
 import { useEffect, useRef } from 'react';
+import dynamic from 'next/dynamic';
 import { Briefcase, BookOpen, GraduationCap, MapPin } from 'lucide-react';
 import SectionHeading from '@/components/ui/SectionHeading';
 import TextType from '@/components/ui/TextType';
-import CurvedLoop from '@/components/ui/CurvedLoop';
 import experience from '@/data/experience';
 import { prefersReducedMotion } from '@/lib/animations';
 import { useTheme } from '@/context/ThemeContext';
+
+const CurvedLoop = dynamic(() => import('@/components/ui/CurvedLoop'), { ssr: false });
 
 const ICON_MAP = {
   internship: Briefcase,

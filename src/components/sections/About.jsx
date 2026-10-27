@@ -1,11 +1,13 @@
 'use client';
 
 import { useEffect, useRef } from 'react';
-import AboutVisual from '@/components/three/AboutVisual';
+import dynamic from 'next/dynamic';
 import { prefersReducedMotion } from '@/lib/animations';
 import { KineticText } from '@/registry/magicui/kinetic-text';
-import PaperCrumple from './PaperCrumple';
 import { useTheme } from '@/context/ThemeContext';
+
+const AboutVisual = dynamic(() => import('@/components/three/AboutVisual'), { ssr: false });
+const PaperCrumple = dynamic(() => import('./PaperCrumple'), { ssr: false });
 
 // Aapke dono theme wale images yahan import kar lijiye
 // Make sure path sahi ho aapke project structure ke hisaab se
