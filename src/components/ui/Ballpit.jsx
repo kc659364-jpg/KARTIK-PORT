@@ -51,7 +51,7 @@ export default function Ballpit({
     }
 
     const isMobile = typeof window !== 'undefined' && window.innerWidth < 768;
-    renderer.setPixelRatio(Math.min(window.devicePixelRatio || 1, isMobile ? 1 : 1.75));
+    renderer.setPixelRatio(Math.min(window.devicePixelRatio || 1, isMobile ? 1.0 : 2.0));
     renderer.setSize(container.clientWidth || 300, container.clientHeight || 150);
     renderer.toneMapping = THREE.ACESFilmicToneMapping;
     renderer.toneMappingExposure = exposure;
@@ -84,10 +84,10 @@ export default function Ballpit({
     const ballMaterial = new THREE.MeshStandardMaterial({
       roughness,
       metalness,
-      envMapIntensity: shadows,
+      envMapIntensity: isMobile ? 0 : shadows,
     });
 
-    const sphereGeometry = new THREE.SphereGeometry(1, isMobile ? 14 : 24, isMobile ? 14 : 24);
+    const sphereGeometry = new THREE.SphereGeometry(1, isMobile ? 8 : 24, isMobile ? 8 : 24);
     const instancedMesh = new THREE.InstancedMesh(sphereGeometry, ballMaterial, count);
     scene.add(instancedMesh);
 
@@ -301,6 +301,9 @@ export default function Ballpit({
         if (isInView && !wasInView && !document.hidden) {
           cancelAnimationFrame(animationFrameId);
           animationFrameId = requestAnimationFrame(animate);
+        } else if (!isInView && animationFrameId) {
+          cancelAnimationFrame(animationFrameId);
+          animationFrameId = null;
         }
       },
       { threshold: 0.05 }

@@ -127,7 +127,7 @@ export default function Hero() {
     >
       <Floating3DParticles
         color={isDark ? '#2563EB' : '#4B2E2B'}
-        quantity={isMobile ? 30 : 90}
+        quantity={isMobile ? 18 : 90}
         size={4.5}
         opacity={0.4}
         drift={0.6}

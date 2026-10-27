@@ -211,6 +211,9 @@ export function IconCloud({ images = [], radius = 75, size = 200, active = true 
         if (isInView && !wasInView && active && !document.hidden) {
           cancelAnimationFrame(animationFrameId);
           animationFrameId = requestAnimationFrame(render);
+        } else if (!isInView && animationFrameId) {
+          cancelAnimationFrame(animationFrameId);
+          animationFrameId = null;
         }
       });
       observer.observe(canvas);

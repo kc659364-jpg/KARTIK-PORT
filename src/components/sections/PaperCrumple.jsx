@@ -205,7 +205,7 @@ export default function PaperCrumple({
     }
 
     const isMobile = typeof window !== 'undefined' && window.innerWidth < 768;
-    renderer.setPixelRatio(Math.min(window.devicePixelRatio || 1, isMobile ? 1 : 1.75));
+    renderer.setPixelRatio(Math.min(window.devicePixelRatio || 1, isMobile ? 1.0 : 2.0));
     renderer.domElement.className = 'paper-crumple-canvas';
     renderer.domElement.setAttribute('aria-label', alt);
     container.appendChild(renderer.domElement);
@@ -220,8 +220,8 @@ export default function PaperCrumple({
     const aspect = width / height;
     const planeH = 3.8;
     const planeW = planeH * aspect;
-    const cols = isMobile ? 20 : 36;
-    const rows = isMobile ? 24 : 46;
+    const cols = isMobile ? 12 : 36;
+    const rows = isMobile ? 16 : 46;
     const paperData = createPaperPath(planeW, planeH, cols, rows);
 
     const geometry = new THREE.BufferGeometry();
@@ -401,6 +401,9 @@ export default function PaperCrumple({
         lastTime = performance.now();
         cancelAnimationFrame(animationFrameId);
         animationFrameId = requestAnimationFrame(animateLoop);
+      } else if (!isInView && animationFrameId) {
+        cancelAnimationFrame(animationFrameId);
+        animationFrameId = null;
       }
     });
     visibilityObserver.observe(container);

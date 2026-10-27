@@ -1037,7 +1037,7 @@ export default function AeroShards({
       cleanups.push(instance.onError(fail));
       const format = navigator.gpu.getPreferredCanvasFormat();
       const sizeFor = () => {
-        const maxDpr = typeof window !== 'undefined' && window.innerWidth < 768 ? 1 : 2;
+        const maxDpr = typeof window !== 'undefined' && window.innerWidth < 768 ? 1.0 : 2.0;
         const ratio = Math.min(window.devicePixelRatio || 1, Math.min(settingsRef.current.dpr, maxDpr));
         return [
           Math.max(1, Math.round(container.clientWidth * ratio)),
@@ -1949,11 +1949,11 @@ export default function AeroShards({
       };
 
       const tick = now => {
-        raf = requestAnimationFrame(tick);
         if (!state.visible || document.hidden) {
-          state.last = now;
+          raf = 0;
           return;
         }
+        raf = requestAnimationFrame(tick);
         const s = settingsRef.current;
         const dt = state.last ? Math.min((now - state.last) / 1000, 0.05) : 0;
         state.last = now;
@@ -2137,7 +2137,15 @@ export default function AeroShards({
       });
 
       const visibility = new IntersectionObserver(entries => {
+        const wasVisible = state.visible;
         state.visible = entries.some(entry => entry.isIntersecting);
+        if (state.visible && !wasVisible && !document.hidden && !raf) {
+          state.last = performance.now();
+          raf = requestAnimationFrame(tick);
+        } else if (!state.visible && raf) {
+          cancelAnimationFrame(raf);
+          raf = 0;
+        }
       });
       visibility.observe(container);
       cleanups.push(() => visibility.disconnect());

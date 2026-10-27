@@ -143,6 +143,9 @@ export function Floating3DParticles({
       if (isInView && !wasInView && !document.hidden) {
         cancelAnimationFrame(animationFrameId);
         animationFrameId = requestAnimationFrame(render);
+      } else if (!isInView && animationFrameId) {
+        cancelAnimationFrame(animationFrameId);
+        animationFrameId = null;
       }
     });
     visibilityObserver.observe(canvas);

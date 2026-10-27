@@ -55,7 +55,7 @@ export default function Footer() {
       {/* 3D Ballpit Interactive Background */}
       <div className="absolute inset-0 z-0 opacity-80 pointer-events-none">
         <Ballpit
-          count={isMobile ? 40 : 130}
+          count={isMobile ? 28 : 130}
           gravity={0}
           friction={0.9975}
           wallBounce={0.95}

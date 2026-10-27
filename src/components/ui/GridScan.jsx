@@ -248,7 +248,7 @@ export default function GridScan({
     }
 
     const isMobile = typeof window !== 'undefined' && window.innerWidth < 768;
-    renderer.setPixelRatio(Math.min(window.devicePixelRatio || 1, isMobile ? 1 : 2));
+    renderer.setPixelRatio(Math.min(window.devicePixelRatio || 1, isMobile ? 1.0 : 2.0));
     renderer.setSize(container.clientWidth || 300, container.clientHeight || 150);
     container.appendChild(renderer.domElement);
 
@@ -273,7 +273,7 @@ export default function GridScan({
       uTime: { value: 0 },
       uLinesColor: { value: parseColor(linesColor, '#77675D') },
       uScanColor: { value: parseColor(scanColor, '#B9825B') },
-      uCells: { value: cells },
+      uCells: { value: isMobile ? Math.min(cells, 5) : cells },
       uDepth: { value: depth },
       uScanDuration: { value: scanDuration },
       uScanDelay: { value: scanDelay },
@@ -281,7 +281,7 @@ export default function GridScan({
       uDepthFade: { value: depthFade },
       uShading: { value: shading },
       uReflection: { value: reflection },
-      uPoints: { value: Boolean(points) },
+      uPoints: { value: isMobile ? false : Boolean(points) },
       uScanWidth: { value: scanWidth },
       uTrail: { value: trail },
       uGlow: { value: glow },
@@ -323,6 +323,9 @@ export default function GridScan({
         if (isInView && !wasInView && !document.hidden) {
           cancelAnimationFrame(animationFrameId);
           animationFrameId = requestAnimationFrame(animate);
+        } else if (!isInView && animationFrameId) {
+          cancelAnimationFrame(animationFrameId);
+          animationFrameId = null;
         }
       },
       { threshold: 0.05 }

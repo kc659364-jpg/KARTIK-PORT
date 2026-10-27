@@ -117,6 +117,9 @@ export function ScrollVelocityRow({
             lastTime = performance.now();
             cancelAnimationFrame(animId);
             animId = requestAnimationFrame(animate);
+          } else if (!isInView && animId) {
+            cancelAnimationFrame(animId);
+            animId = null;
           }
         },
         { threshold: 0.05 }

@@ -230,7 +230,7 @@ const FallingText = ({
       });
       block.style.minHeight = `${block.offsetHeight}px`;
       const isMobile = typeof window !== 'undefined' && window.innerWidth < 768;
-      const world = Matter.Engine.create({ enableSleeping: true, positionIterations: isMobile ? 4 : 10, velocityIterations: isMobile ? 4 : 8 });
+      const world = Matter.Engine.create({ enableSleeping: true, positionIterations: isMobile ? 2 : 10, velocityIterations: isMobile ? 2 : 8 });
       world.gravity.y = clamp(s.gravity, -3, 4) * 1.4;
       walls = [
         Matter.Bodies.rectangle(0, 0, 10000, WALL, { isStatic: true, friction: 0.8 }),

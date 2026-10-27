@@ -191,7 +191,7 @@ export default function WhyWorkWithMe() {
       {/* AeroShards WebGPU Background */}
       <div className="absolute inset-0 z-0 opacity-60">
         <AeroShards
-          count={isMobile ? 250 : 700}
+          count={isMobile ? 160 : 700}
           shardColor={isDark ? '#2563EB' : '#4B2E2B'}
           accentColor={isDark ? '#3B82F6' : '#784C47'}
           backgroundColor="transparent"

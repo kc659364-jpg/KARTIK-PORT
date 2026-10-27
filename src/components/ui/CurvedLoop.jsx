@@ -251,11 +251,15 @@ export function CurvedLoop({
     const observer =
       typeof IntersectionObserver !== 'undefined'
         ? new IntersectionObserver(([entry]) => {
+            const wasVisible = visible;
             visible = entry.isIntersecting;
-            if (visible && !frame) {
+            if (visible && !wasVisible && !frame) {
               last = 0;
               scrollRef.current.level = 0;
               frame = requestAnimationFrame(tick);
+            } else if (!visible && frame) {
+              cancelAnimationFrame(frame);
+              frame = 0;
             }
           })
         : null;

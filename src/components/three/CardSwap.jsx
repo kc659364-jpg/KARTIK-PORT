@@ -754,6 +754,10 @@ const CardSwap = forwardRef(
       resizeObserver.observe(root);
       const intersectionObserver = new IntersectionObserver(entries => {
         state.inView = entries[entries.length - 1]?.isIntersecting ?? true;
+        if (!state.inView && state.raf) {
+          cancelAnimationFrame(state.raf);
+          state.raf = 0;
+        }
         schedule();
       });
       intersectionObserver.observe(root);
