@@ -91,6 +91,7 @@ const TextType = ({
   const [isDeleting, setIsDeleting] = useState(false);
   const [isVisible, setIsVisible] = useState(!startOnVisible);
   const [reduceMotion, setReduceMotion] = useState(false);
+  
   const containerRef = useRef(null);
   const caretRef = useRef(null);
   const cursorRef = useRef(null);
@@ -119,7 +120,7 @@ const TextType = ({
 
   useEffect(() => {
     const query = window.matchMedia('(prefers-reduced-motion: reduce)');
-    const update = () => setReduceMotion(query.matches);
+    const update = () => setReduceMotion(query.matches || window.innerWidth < 768);
     update();
     query.addEventListener('change', update);
     return () => query.removeEventListener('change', update);
@@ -156,8 +157,8 @@ const TextType = ({
     blinkTimeline.current = timeline;
 
     return () => {
-      timeline.kill();
-      blinkResume.current?.kill();
+      if(timeline) timeline.kill();
+      if(blinkResume.current) blinkResume.current.kill();
       gsap.killTweensOf(blink);
       blinkTimeline.current = null;
     };
@@ -190,7 +191,7 @@ const TextType = ({
       const blink = blinkRef.current;
       if (instant || !timeline || !blink) return;
       timeline.pause();
-      blinkResume.current?.kill();
+      if(blinkResume.current) blinkResume.current.kill();
       gsap.to(blink, { opacity: 1, duration: 0.12, ease: 'power1.out' });
       blinkResume.current = gsap.delayedCall(0.12, () => timeline.restart());
     };

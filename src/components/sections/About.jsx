@@ -1,134 +1,39 @@
 'use client';
 
-import { useEffect, useRef, useState } from 'react';
+import { useEffect, useRef, useState, useLayoutEffect } from 'react';
 import dynamic from 'next/dynamic';
-import { Target, Smartphone, Sparkles, Layers } from 'lucide-react';
-import SectionHeading from '@/components/ui/SectionHeading';
 import { prefersReducedMotion } from '@/lib/animations';
+import { KineticText } from '@/registry/magicui/kinetic-text';
 import { useTheme } from '@/context/ThemeContext';
 
-const AeroShards = dynamic(() => import('@/components/ui/AeroShards'), { ssr: false });
-const FallingText = dynamic(() => import('@/components/ui/FallingText'), { ssr: false });
+const AboutVisual = dynamic(() => import('@/components/three/AboutVisual'), { ssr: false });
+const PaperCrumple = dynamic(() => import('./PaperCrumple'), { ssr: false });
 
-const VALUES = [
-  {
-    icon: Target,
-    title: 'Practical Problem-Solving',
-    description:
-      'I focus on building useful digital solutions around real requirements, ensuring every feature serves a distinct purpose.',
-  },
-  {
-    icon: Smartphone,
-    title: 'Responsive Development',
-    description:
-      'I aim to create interfaces that work smoothly across desktop, tablet, and mobile with fluid layouts and touch-friendly controls.',
-  },
-  {
-    icon: Sparkles,
-    title: 'Creative Experiences',
-    description:
-      'I combine development with interactive design, animation, and visual presentation to deliver distinctive web presences.',
-  },
-  {
-    icon: Layers,
-    title: 'Maintainable Structure',
-    description:
-      'I prefer reusable components and organized code that can be improved, extended, and maintained easily over time.',
-  },
+import paperLight from '@/img/paper1.png';
+import paperDark from '@/img/paper2.png';
+
+const CORE_TECH = [
+  'React.js',
+  'JavaScript',
+  'PHP',
+  'MySQL',
+  'GSAP',
+  'Three.js',
+  'Bootstrap',
+  'Node.js',
 ];
 
-function InteractiveCard({ item }) {
-  const [transform, setTransform] = useState({ rotateX: 0, rotateY: 0 });
-  const iconRef = useRef(null);
-  const { isDark } = useTheme();
+const useIsomorphicLayoutEffect = typeof window !== 'undefined' ? useLayoutEffect : useEffect;
 
-  useEffect(() => {
-    if (prefersReducedMotion() || !iconRef.current) return;
-    let tween;
-    import('gsap').then(({ gsap }) => {
-      if (!iconRef.current) return;
-      tween = gsap.to(iconRef.current, {
-        rotateY: 360,
-        duration: 4,
-        repeat: -1,
-        ease: 'linear',
-        transformOrigin: 'center center',
-      });
-    });
-
-    return () => {
-      if (tween && tween.kill) tween.kill();
-    };
-  }, []);
-
-  const handleMouseMove = (e) => {
-    const rect = e.currentTarget.getBoundingClientRect();
-    const x = e.clientX - rect.left;
-    const y = e.clientY - rect.top;
-
-    const normalizedX = x / rect.width - 0.5;
-    const normalizedY = y / rect.height - 0.5;
-
-    const rotateX = Math.round(normalizedY * -20 * 100) / 100;
-    const rotateY = Math.round(normalizedX * 20 * 100) / 100;
-
-    setTransform({ rotateX, rotateY });
-  };
-
-  const handleMouseLeave = () => {
-    setTransform({ rotateX: 0, rotateY: 0 });
-  };
-
-  const Icon = item.icon;
-
-  const rainbowBackground = isDark 
-    ? 'linear-gradient(124deg, rgba(255,0,0,0.15), rgba(255,165,0,0.15), rgba(255,255,0,0.15), rgba(0,128,0,0.15), rgba(0,0,255,0.15), rgba(75,0,130,0.15), rgba(238,130,238,0.15))'
-    : 'linear-gradient(124deg, rgba(255,0,0,0.1), rgba(255,165,0,0.1), rgba(255,255,0,0.1), rgba(0,128,0,0.1), rgba(0,0,255,0.1), rgba(75,0,130,0.1), rgba(238,130,238,0.1))';
-
-  return (
-    <div
-      onMouseMove={handleMouseMove}
-      onMouseLeave={handleMouseLeave}
-      style={{
-        transform: `perspective(1000px) rotateX(${transform.rotateX}deg) rotateY(${transform.rotateY}deg)`,
-      }}
-      className="group relative bg-[#E8DCCB] dark:bg-[#111827] border border-[#D8C7B3] dark:border-[#1E293B] rounded-lg p-7 flex flex-col overflow-hidden transition-transform duration-200 ease-out hover:shadow-card-hover dark:hover:shadow-black/70 hover:border-[#4B2E2B]/50 dark:hover:border-[#2563EB]/50"
-    >
-      <div
-        className="pointer-events-none absolute inset-0 opacity-0 transition-opacity duration-500 group-hover:opacity-100"
-        style={{
-          backgroundImage: rainbowBackground,
-          backgroundSize: '400% 400%',
-          animation: 'rainbowHoverCard 4s ease infinite',
-        }}
-      />
-      
-      <div
-        ref={iconRef}
-        className="relative z-10 w-12 h-12 rounded-xl bg-[#4B2E2B]/10 text-[#4B2E2B] dark:bg-[#2563EB]/15 dark:text-[#60A5FA] flex items-center justify-center mb-5 transition-all duration-300 group-hover:scale-110 group-hover:bg-[#4B2E2B] dark:group-hover:bg-[#2563EB] group-hover:text-white dark:group-hover:text-white shadow-sm"
-        style={{ transformStyle: 'preserve-3d' }}
-      >
-        <Icon size={20} />
-      </div>
-      <h3 className="relative z-10 font-display text-base font-semibold text-[#241714] dark:text-[#FFFFFF] mb-3 leading-snug">
-        {item.title}
-      </h3>
-      <p className="relative z-10 text-xs sm:text-sm text-[#5C4845] dark:text-[#94A3B8] leading-relaxed m-0">
-        {item.description}
-      </p>
-    </div>
-  );
-}
-
-export default function WhyWorkWithMe() {
+export default function About() {
   const sectionRef = useRef(null);
-  const gridRef = useRef(null);
+  const contentRef = useRef(null);
   const { isDark } = useTheme();
   
   const [mounted, setMounted] = useState(false);
-  const [isMobile, setIsMobile] = useState(true);
+  const [isMobile, setIsMobile] = useState(true); // Default true
 
-  useEffect(() => {
+  useIsomorphicLayoutEffect(() => {
     setMounted(true);
     const checkMobile = () => setIsMobile(window.innerWidth < 768);
     checkMobile();
@@ -137,7 +42,7 @@ export default function WhyWorkWithMe() {
   }, []);
 
   useEffect(() => {
-    if (prefersReducedMotion() || !gridRef.current) return;
+    if (prefersReducedMotion()) return;
 
     let ctx;
     import('gsap').then(({ gsap }) => {
@@ -146,13 +51,13 @@ export default function WhyWorkWithMe() {
 
         ctx = gsap.context(() => {
           gsap.fromTo(
-            gridRef.current.children,
+            contentRef.current.children,
             { opacity: 0, y: 30 },
             {
               opacity: 1,
               y: 0,
-              duration: 0.6,
-              stagger: 0.12,
+              duration: 0.8,
+              stagger: 0.15,
               ease: 'power3.out',
               scrollTrigger: {
                 trigger: sectionRef.current,
@@ -169,86 +74,79 @@ export default function WhyWorkWithMe() {
       if (ctx && ctx.revert) ctx.revert();
     };
   }, []);
+  
+  const currentPaperSrc = isDark ? paperDark.src : paperLight.src;
 
   return (
     <section
-      id="why-work-with-me"
+      id="about"
       ref={sectionRef}
-      className="bg-[#FFFFFF] dark:bg-[#0B0F19] py-24 sm:py-32 relative border-t border-[#E8DCCB] dark:border-[#1E293B] overflow-hidden transition-colors duration-300"
+      className="bg-[#FFFFFF] dark:bg-[#0B0F19] py-24 sm:py-32 relative overflow-hidden transition-colors duration-300 border-t border-[#E8DCCB]/60 dark:border-[#1E293B]"
     >
-      <style dangerouslySetInnerHTML={{__html: `
-        @keyframes rainbowTextWipe {
-          0% { background-position: 0% center; }
-          100% { background-position: -200% center; }
-        }
-        @keyframes rainbowHoverCard {
-          0% { background-position: 0% 50%; }
-          50% { background-position: 100% 50%; }
-          100% { background-position: 0% 50%; }
-        }
-      `}} />
+      <div className="container mx-auto px-4 sm:px-6">
+        <div className="grid grid-cols-1 lg:grid-cols-12 gap-12 lg:gap-16 items-center">
+          
+          <div className="lg:col-span-5 flex justify-center">
+            <AboutVisual />
+          </div>
 
-      {/* AeroShards completely bypassed on mobile */}
-      {mounted && !isMobile && (
-        <div className="absolute inset-0 z-0 opacity-60">
-          <AeroShards
-            count={700}
-            shardColor={isDark ? '#2563EB' : '#4B2E2B'}
-            accentColor={isDark ? '#3B82F6' : '#784C47'}
-            backgroundColor="transparent"
-            material="glass"
-            placement="full"
-            spread={1.5}
-            depthOfField={0.8}
-            lightMode={!isDark}
-            mouseInteraction={true}
-            pulseOnClick={true}
-          />
-        </div>
-      )}
-
-      <div className="container mx-auto relative z-10">
-        <SectionHeading
-          label="My Approach"
-          title={
-            <span 
-              className="inline-block text-transparent bg-clip-text"
-              style={{
-                backgroundImage: 'linear-gradient(to right, #4facfe 0%, #00f2fe 25%, #f093fb 50%, #f5576c 75%, #4facfe 100%)',
-                backgroundSize: '200% auto',
-                animation: 'rainbowTextWipe 4s linear infinite',
-              }}
-            >
-              Why Work With Me.
+          <div ref={contentRef} className="lg:col-span-7 flex flex-col relative z-10">
+            <span className="inline-block text-xs font-semibold tracking-widest uppercase text-[#4B2E2B] dark:text-[#2563EB] mb-3">
+              About Me
             </span>
-          }
-          description="" 
-          align="center"
-        />
+            <div className="relative cursor-pointer">
+              <KineticText
+                text="Bridging Clean Code & Creative Web Experiences."
+                as="h2"
+                baseWeight={500}
+                maxWeight={900}
+                proximityRadius={100}
+                className="font-display text-3xl sm:text-4xl lg:text-5xl text-[#241714] dark:text-[#FFFFFF] leading-tight tracking-[-1%] [font-optical-sizing:auto]"
+              />
+            </div>
 
-        <div className="w-full max-w-3xl mx-auto h-[120px] sm:h-[150px] flex items-center justify-center -mt-6 mb-12 relative z-20">
-          {mounted && !isMobile ? (
-            <FallingText
-              text="Clear communication, practical architectural decisions, and an eye for creative detail in every project."
-              highlightWords={["communication,", "practical", "creative", "detail"]}
-              trigger="hover" 
-              backgroundColor="transparent"
-              variant="text"
-              fontSize="1.1rem"
-              theme={isDark ? 'dark' : 'light'}
-              accentColor={isDark ? '#2563EB' : '#4B2E2B'}
-            />
-          ) : (
-            <p className="text-center text-sm sm:text-base text-[#5C4845] dark:text-[#94A3B8] px-4">
-              Clear <strong className="text-[#241714] dark:text-white">communication</strong>, <strong className="text-[#241714] dark:text-white">practical</strong> architectural decisions, and an eye for <strong className="text-[#241714] dark:text-white">creative detail</strong> in every project.
-            </p>
-          )}
-        </div>
+            <div className="relative z-20 w-full lg:w-[90%] lg:-ml-[8%] h-[400px] sm:h-[450px] lg:h-[550px] pointer-events-auto flex items-center justify-center cursor-grab active:cursor-grabbing">
+              {/* Mobile Block: Render 3D only on Desktop, Static Image on Mobile */}
+              {mounted && !isMobile ? (
+                <PaperCrumple
+                  src={currentPaperSrc}
+                  alt="Kartik Chauhan Description"
+                  width={500}        
+                  height={500}       
+                  sceneHeight="100%"
+                  imageFit="contain" 
+                  paperColor={isDark ? '#0B0F19' : '#FFFFFF'}
+                  shadow={false}
+                  draggable={true}
+                  crumpleAmount={0.85}
+                  foldCount={8}      
+                  releaseBehavior="restore" 
+                />
+              ) : (
+                <img 
+                  src={currentPaperSrc} 
+                  alt="Kartik Chauhan Description" 
+                  className="w-full h-full object-contain drop-shadow-[0_10px_30px_rgba(0,0,0,0.15)] dark:drop-shadow-[0_10px_30px_rgba(0,0,0,0.4)]"
+                />
+              )}
+            </div>
 
-        <div ref={gridRef} className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6">
-          {VALUES.map((item, index) => (
-            <InteractiveCard item={item} key={index} />
-          ))}
+            <div className="relative z-30 mb-0 border-t border-[#E8DCCB] dark:border-[#1E293B] pt-6 pointer-events-auto">
+              <h4 className="text-xs font-semibold tracking-wider uppercase text-[#241714] dark:text-[#94A3B8] mb-3">
+                Core Technologies
+              </h4>
+              <div className="flex flex-wrap gap-2">
+                {CORE_TECH.map((tech) => (
+                  <span
+                    key={tech}
+                    className="text-xs font-medium text-[#241714] dark:text-[#FFFFFF] bg-[#E8DCCB] dark:bg-[#111827] px-3.5 py-1.5 rounded-full border border-[#D8C7B3] dark:border-[#1E293B] hover:border-[#4B2E2B] dark:hover:border-[#2563EB] hover:text-[#4B2E2B] dark:hover:text-[#2563EB] hover:-translate-y-0.5 transition-all duration-200 shadow-sm"
+                  >
+                    {tech}
+                  </span>
+                ))}
+              </div>
+            </div>
+          </div>
         </div>
       </div>
     </section>

@@ -70,6 +70,10 @@ const ScrambledText = ({
     const textEl = textRef.current;
     if (!root || !textEl || !fontsReady) return;
 
+    // Strict check for mobile to prevent heavy pointer calculations
+    const isMobile = window.innerWidth < 768 || window.matchMedia('(pointer: coarse)').matches;
+    const reduce = window.matchMedia('(prefers-reduced-motion: reduce)').matches || isMobile;
+
     const split = SplitText.create(textEl, { type: 'chars', smartWrap: true, aria: 'none' });
     const chars = split.chars;
     const originals = chars.map(char => char.textContent ?? '');
@@ -83,8 +87,8 @@ const ScrambledText = ({
       char.replaceChildren(sizer, glyph);
       return glyph;
     });
+    
     const points = chars.map(() => ({ x: 0, y: 0, energy: 0, dx: 0, dy: 0, shown: false }));
-    const reduce = window.matchMedia('(prefers-reduced-motion: reduce)').matches;
     const pointer = { x: 0, y: 0, sx: 0, sy: 0, inside: false };
     const waves = [];
     let measured = false;
@@ -109,7 +113,7 @@ const ScrambledText = ({
       };
     };
 
-    if (intro && !reduce) {
+    if (intro && !window.matchMedia('(prefers-reduced-motion: reduce)').matches) {
       const introLength = settingsRef.current.duration;
       const timeline = gsap.timeline({ paused: true });
       glyphs.forEach((glyph, index) => {
@@ -267,7 +271,7 @@ const ScrambledText = ({
     };
 
     const wake = () => {
-      if (!raf) raf = requestAnimationFrame(tick);
+      if (!raf && !reduce) raf = requestAnimationFrame(tick);
     };
 
     const scrambleNearPointer = () => {
@@ -282,10 +286,12 @@ const ScrambledText = ({
     };
 
     const handleEnter = () => {
+      if(reduce) return;
       measured = false;
     };
 
     const handleMove = e => {
+      if(reduce) return;
       const [x, y] = toLocal(e);
       pointer.x = x;
       pointer.y = y;
@@ -295,17 +301,18 @@ const ScrambledText = ({
         pointer.inside = true;
       }
       if (PHYSICAL[settingsRef.current.effect]) {
-        if (!reduce) wake();
+        wake();
       } else if (!moveFrame) moveFrame = requestAnimationFrame(scrambleNearPointer);
     };
 
     const handleLeave = () => {
+      if(reduce) return;
       pointer.inside = false;
       wake();
     };
 
     const handleDown = e => {
-      if (!settingsRef.current.clickBurst || (e.pointerType === 'mouse' && e.button !== 0)) return;
+      if (reduce || !settingsRef.current.clickBurst || (e.pointerType === 'mouse' && e.button !== 0)) return;
       if (!measured) measure();
       const [x, y] = toLocal(e);
       let reach = 0;
@@ -329,22 +336,22 @@ const ScrambledText = ({
       measured = false;
     });
     resize.observe(root);
-    document.fonts?.ready
-      .then(() => {
-        measured = false;
-      })
-      .catch(() => {});
-
-    root.addEventListener('pointerenter', handleEnter);
-    root.addEventListener('pointermove', handleMove);
-    root.addEventListener('pointerleave', handleLeave);
-    root.addEventListener('pointerdown', handleDown);
+    
+    // Only bind pointer events on desktop to save mobile CPU
+    if(!reduce) {
+      root.addEventListener('pointerenter', handleEnter);
+      root.addEventListener('pointermove', handleMove);
+      root.addEventListener('pointerleave', handleLeave);
+      root.addEventListener('pointerdown', handleDown);
+    }
 
     return () => {
-      root.removeEventListener('pointerenter', handleEnter);
-      root.removeEventListener('pointermove', handleMove);
-      root.removeEventListener('pointerleave', handleLeave);
-      root.removeEventListener('pointerdown', handleDown);
+      if(!reduce) {
+        root.removeEventListener('pointerenter', handleEnter);
+        root.removeEventListener('pointermove', handleMove);
+        root.removeEventListener('pointerleave', handleLeave);
+        root.removeEventListener('pointerdown', handleDown);
+      }
       resize.disconnect();
       cancelAnimationFrame(raf);
       cancelAnimationFrame(moveFrame);
@@ -375,4 +382,3 @@ const ScrambledText = ({
 };
 
 export default ScrambledText;
-

@@ -78,14 +78,8 @@ export function createPaperPath(width, height, cols = 40, rows = 50, seed = 42) 
   }
 
   return {
-    positions,
-    normals,
-    uvs,
-    layers,
-    foldAngles,
-    indices: new Uint16Array(indices),
-    cols,
-    rows,
+    positions, normals, uvs, layers, foldAngles,
+    indices: new Uint16Array(indices), cols, rows,
   };
 }
 
@@ -100,16 +94,8 @@ export function separateLayers(positions, layers, crumpleProgress, maxOffset = 0
 }
 
 export function advance(
-  currentPositions,
-  originalPositions,
-  layers,
-  foldAngles,
-  grabX,
-  grabY,
-  crumpleProgress,
-  crumpleAmount,
-  rotationX,
-  rotationY
+  currentPositions, originalPositions, layers, foldAngles, grabX, grabY,
+  crumpleProgress, crumpleAmount, rotationX, rotationY
 ) {
   const count = layers.length;
   const ballTargetRadius = 0.85;
@@ -138,7 +124,6 @@ export function advance(
     currentPositions[idx + 1] = targetY;
     currentPositions[idx + 2] = targetZ;
   }
-
   separateLayers(currentPositions, layers, crumpleProgress);
 }
 
@@ -204,8 +189,7 @@ export default function PaperCrumple({
       return undefined;
     }
 
-    const isMobile = typeof window !== 'undefined' && window.innerWidth < 768;
-    renderer.setPixelRatio(Math.min(window.devicePixelRatio || 1, isMobile ? 1.0 : 2.0));
+    renderer.setPixelRatio(Math.min(window.devicePixelRatio || 1, 1.5));
     renderer.domElement.className = 'paper-crumple-canvas';
     renderer.domElement.setAttribute('aria-label', alt);
     container.appendChild(renderer.domElement);
@@ -220,8 +204,10 @@ export default function PaperCrumple({
     const aspect = width / height;
     const planeH = 3.8;
     const planeW = planeH * aspect;
-    const cols = isMobile ? 12 : 36;
-    const rows = isMobile ? 16 : 46;
+    
+    // Performance Fix: Reduced Geometry Grid for lightning-fast parsing
+    const cols = 24; 
+    const rows = 32; 
     const paperData = createPaperPath(planeW, planeH, cols, rows);
 
     const geometry = new THREE.BufferGeometry();
@@ -238,11 +224,10 @@ export default function PaperCrumple({
       if (!nw || !nh) return;
       camera.aspect = nw / nh;
       
-      // Dynamic camera distance for true responsiveness
       const fovRad = (camera.fov * Math.PI) / 180;
       const distH = (planeH / 2) / Math.tan(fovRad / 2);
       const distW = (planeW / 2) / Math.tan(fovRad / 2) / camera.aspect;
-      camera.position.z = Math.max(distH, distW) * 1.15; // 1.15 adds proper padding
+      camera.position.z = Math.max(distH, distW) * 1.15;
       
       camera.updateProjectionMatrix();
       renderer.setSize(nw, nh);
@@ -311,8 +296,12 @@ export default function PaperCrumple({
         }
         texture = tex;
         texture.colorSpace = THREE.SRGBColorSpace;
+        
+        // Critical Performance Fix: Disable expensive Mipmaps for instant loading
+        texture.generateMipmaps = false;
+        texture.minFilter = THREE.LinearFilter;
+        texture.magFilter = THREE.LinearFilter;
 
-        // Force color to 0xffffff so it renders exact original image colors (no black box tinting)
         const material = shadow
           ? new THREE.MeshStandardMaterial({
               map: texture,
@@ -371,16 +360,8 @@ export default function PaperCrumple({
         if (crumpleProgress > 0.001 || isDragging) {
           const currentPos = geometry.attributes.position.array;
           advance(
-            currentPos,
-            originalPositions,
-            paperData.layers,
-            paperData.foldAngles,
-            grabPoint.x,
-            grabPoint.y,
-            crumpleProgress,
-            crumpleAmount,
-            rotX,
-            rotY
+            currentPos, originalPositions, paperData.layers, paperData.foldAngles,
+            grabPoint.x, grabPoint.y, crumpleProgress, crumpleAmount, rotX, rotY
           );
           geometry.attributes.position.needsUpdate = true;
           geometry.computeVertexNormals();
@@ -436,18 +417,8 @@ export default function PaperCrumple({
       if (container.contains(canvasEl)) container.removeChild(canvasEl);
     };
   }, [
-    alt,
-    crumpleAmount,
-    crumpleDuration,
-    draggable,
-    height,
-    paperColor,
-    releaseBehavior,
-    releaseDuration,
-    returnToOrigin,
-    shadow,
-    src,
-    width,
+    alt, crumpleAmount, crumpleDuration, draggable, height, paperColor,
+    releaseBehavior, releaseDuration, returnToOrigin, shadow, src, width,
   ]);
 
   return (
