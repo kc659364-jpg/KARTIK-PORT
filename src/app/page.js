@@ -13,6 +13,23 @@ const WhyWorkWithMe = dynamic(
 const Contact = dynamic(() => import("@/components/sections/Contact"));
 const Footer = dynamic(() => import("@/components/layout/Footer"));
 
+// Yahan tumhara naya SEO Metadata add ho gaya
+export const metadata = {
+  title: "Best Website Developer Agency | AI Automation Developer",
+  description: "Top website developers offering creative digital solutions. We specialize in AI automation, custom web applications, and high-performance modern websites.",
+  keywords: [
+    "best developer agency",
+    "best website developer agency",
+    "top website developers",
+    "creative website developer",
+    "ai automation",
+    "ai automation developer",
+    "freelance web developer",
+    "web development agency",
+    "website devloper in surat"
+  ],
+};
+
 export default function Home() {
   return (
     <>
