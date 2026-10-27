@@ -1,0 +1,37 @@
+.paper-crumple-container {
+  position: relative;
+  width: 100%;
+  height: 100%;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  overflow: hidden;
+  cursor: grab;
+  user-select: none;
+  touch-action: none;
+}
+
+.paper-crumple-container:active {
+  cursor: grabbing;
+}
+
+.paper-crumple-canvas {
+  width: 100%;
+  height: 100%;
+  display: block;
+}
+
+.paper-crumple-fallback {
+  position: absolute;
+  inset: 0;
+  z-index: 1;
+  width: 100%;
+  height: 100%;
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+  padding: 1.5rem;
+  background-color: var(--paper-color, #F6F0E7);
+  border-radius: 1rem;
+  border: 1px dashed rgba(185, 130, 91, 0.3);
+}

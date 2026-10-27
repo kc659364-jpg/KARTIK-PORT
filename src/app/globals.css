@@ -1,0 +1,137 @@
+@import url('https://fonts.googleapis.com/css2?family=DM+Sans:ital,opsz,wght@0,9..40,300..700;1,9..40,400..700&family=Playfair+Display:ital,wght@0,400..700;1,400..700&display=swap');
+
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+@layer base {
+  :root {
+    /* Exact Light Theme Palette (Coffee / Beige) */
+    --background: 0 0% 100%;       /* Primary Background (White) #FFFFFF */
+    --foreground: 11 28% 11%;      /* Primary Text (Dark Brown) #241714 */
+    --primary: 5 28% 23%;          /* Accents/Buttons (Coffee) #4B2E2B */
+    --primary-foreground: 0 0% 100%;
+    
+    --bg-base: #FFFFFF;
+    --card-bg: #E8DCCB;
+    --accent: #4B2E2B;
+    --text-primary: #241714;
+    --text-secondary: #5C4845;
+    --border-color: #D8C7B3;
+
+    /* Legacy tokens mapped to exact light palette */
+    --espresso: #241714;
+    --cream: #FFFFFF;
+    --caramel: #4B2E2B;
+    --white: #FFFFFF;
+    --muted-brown: #5C4845;
+    --light-latte: #E8DCCB;
+    --border-subtle: #D8C7B3;
+  }
+
+  html.dark {
+    /* Exact Dark Theme Palette (Black / Blue) */
+    --background: 222 38% 7%;      /* Base Black #0B0F19 */
+    --foreground: 0 0% 100%;       /* Primary Text (White) #FFFFFF */
+    --primary: 217 91% 60%;        /* Accents/Highlights (Blue) #2563EB */
+    --primary-foreground: 0 0% 100%;
+
+    --bg-base: #0B0F19;
+    --card-bg: #111827;
+    --accent: #2563EB;
+    --text-primary: #FFFFFF;
+    --text-secondary: #94A3B8;
+    --border-color: #1E293B;
+
+    /* Legacy tokens mapped to exact dark palette */
+    --espresso: #FFFFFF;
+    --cream: #0B0F19;
+    --caramel: #2563EB;
+    --white: #111827;
+    --muted-brown: #94A3B8;
+    --light-latte: #1E293B;
+    --border-subtle: #1E293B;
+  }
+
+  * {
+    @apply border-border-subtle;
+    box-sizing: border-box;
+    margin: 0;
+    padding: 0;
+  }
+
+  html {
+    scroll-behavior: smooth;
+    -webkit-text-size-adjust: 100%;
+  }
+
+  body {
+    font-family: 'DM Sans', system-ui, -apple-system, sans-serif;
+    background-color: #FFFFFF;
+    color: #241714;
+    -webkit-font-smoothing: antialiased;
+    -moz-osx-font-smoothing: grayscale;
+    overflow-x: hidden;
+    transition: background-color 0.25s ease, color 0.25s ease;
+  }
+
+  html.dark body {
+    background-color: #0B0F19;
+    color: #FFFFFF;
+  }
+
+  h1, h2, h3, h4, h5, h6 {
+    font-family: 'Playfair Display', Georgia, serif;
+    font-weight: 600;
+    color: #241714;
+    transition: color 0.25s ease;
+  }
+
+  html.dark h1,
+  html.dark h2,
+  html.dark h3,
+  html.dark h4,
+  html.dark h5,
+  html.dark h6 {
+    color: #FFFFFF;
+  }
+
+  html.dark .section-label {
+    color: #2563EB !important;
+  }
+  html.dark .section-title {
+    color: #FFFFFF !important;
+  }
+  html.dark .section-description {
+    color: #94A3B8 !important;
+  }
+}
+
+/* Base custom utility classes */
+.container {
+  width: 100%;
+  max-width: 1200px;
+  margin-left: auto;
+  margin-right: auto;
+  padding-left: 24px;
+  padding-right: 24px;
+}
+
+@media (max-width: 480px) {
+  .container {
+    padding-left: 16px;
+    padding-right: 16px;
+  }
+}
+
+/* Reduced motion preference */
+@media (prefers-reduced-motion: reduce) {
+  *,
+  *::before,
+  *::after {
+    animation-duration: 0.01ms !important;
+    animation-iteration-count: 1 !important;
+    transition-duration: 0.01ms !important;
+    scroll-behavior: auto !important;
+  }
+}
