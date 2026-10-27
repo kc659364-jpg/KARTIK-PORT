@@ -1,6 +1,6 @@
 'use client';
 
-import { useEffect, useRef } from 'react';
+import { useEffect, useRef, useState } from 'react';
 import dynamic from 'next/dynamic';
 import { Briefcase, BookOpen, GraduationCap, MapPin } from 'lucide-react';
 import SectionHeading from '@/components/ui/SectionHeading';
@@ -21,6 +21,18 @@ export default function Experience() {
   const sectionRef = useRef(null);
   const timelineRef = useRef(null);
   const { isDark } = useTheme();
+
+  // Mobile bypass state
+  const [mounted, setMounted] = useState(false);
+  const [isMobile, setIsMobile] = useState(true);
+
+  useEffect(() => {
+    setMounted(true);
+    const checkMobile = () => setIsMobile(window.innerWidth < 768);
+    checkMobile();
+    window.addEventListener('resize', checkMobile, { passive: true });
+    return () => window.removeEventListener('resize', checkMobile);
+  }, []);
 
   useEffect(() => {
     if (prefersReducedMotion() || !timelineRef.current) return;
@@ -66,26 +78,32 @@ export default function Experience() {
     >
       <div className="container mx-auto">
         <SectionHeading
-          label="Journey &amp; Education"
-          title="Practical Experience &amp; Academic Background."
+          label="Journey & Education"
+          title="Practical Experience & Academic Background."
           description={
             <div className="w-full max-w-4xl mx-auto py-1">
-              <CurvedLoop
-                marqueeText="A timeline of my hands-on internships, continuous independent project development, and academic foundations in computer applications."
-                shape="wave"
-                speed={1.6}
-                curveAmount={45}
-                direction="left"
-                fontSize={32}
-                fontWeight={600}
-                separator="✦"
-                separatorColor={isDark ? '#2563EB' : '#4B2E2B'}
-                color={isDark ? '#94A3B8' : '#5C4845'}
-                edgeFade={0.15}
-                interactive={true}
-                pauseOnHover={true}
-                scrollBoost={0.4}
-              />
+              {mounted && !isMobile ? (
+                <CurvedLoop
+                  marqueeText="A timeline of my hands-on internships, continuous independent project development, and academic foundations in computer applications."
+                  shape="wave"
+                  speed={1.6}
+                  curveAmount={45}
+                  direction="left"
+                  fontSize={32}
+                  fontWeight={600}
+                  separator="✦"
+                  separatorColor={isDark ? '#2563EB' : '#4B2E2B'}
+                  color={isDark ? '#94A3B8' : '#5C4845'}
+                  edgeFade={0.15}
+                  interactive={true}
+                  pauseOnHover={true}
+                  scrollBoost={0.4}
+                />
+              ) : (
+                <p className="text-sm sm:text-base font-medium text-center text-[#5C4845] dark:text-[#94A3B8] px-4">
+                  A timeline of my hands-on internships, continuous independent project development, and academic foundations in computer applications.
+                </p>
+              )}
             </div>
           }
           align="center"
@@ -123,22 +141,26 @@ export default function Experience() {
                   </div>
 
                   <div className="mt-3 text-sm leading-relaxed text-[#5C4845] dark:text-[#94A3B8] min-h-[60px]">
-                    <TextType
-                      text={[item.description]}
-                      typingSpeed={30}
-                      deletingSpeed={50}
-                      pauseDuration={1500}
-                      showCursor
-                      cursorCharacter="_"
-                      cursorStyle="underscore"
-                      cursorBlinkDuration={0.5}
-                      cursorColor="currentColor"
-                      cursorGlide
-                      deleteMode="none"
-                      mistakes={0}
-                      loop={false}
-                      typeEffect="none"
-                    />
+                    {mounted && !isMobile ? (
+                      <TextType
+                        text={[item.description]}
+                        typingSpeed={30}
+                        deletingSpeed={50}
+                        pauseDuration={1500}
+                        showCursor
+                        cursorCharacter="_"
+                        cursorStyle="underscore"
+                        cursorBlinkDuration={0.5}
+                        cursorColor="currentColor"
+                        cursorGlide
+                        deleteMode="none"
+                        mistakes={0}
+                        loop={false}
+                        typeEffect="none"
+                      />
+                    ) : (
+                      <p>{item.description}</p>
+                    )}
                   </div>
                 </div>
               </div>

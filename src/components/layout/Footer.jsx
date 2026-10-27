@@ -1,7 +1,7 @@
 'use client';
 
 import dynamic from 'next/dynamic';
-import { useState, useEffect } from 'react';
+import { useState, useEffect, useRef } from 'react';
 import { Mail, MessageSquare, ArrowUp } from 'lucide-react';
 import { GithubIcon, LinkedinIcon } from '@/components/ui/Icons';
 import { scrollToSection, getWhatsAppUrl } from '@/lib/utils';
@@ -25,8 +25,12 @@ export default function Footer() {
   const currentYear = 2026;
   const { isDark } = useTheme();
   
+  const footerRef = useRef(null);
   const [mounted, setMounted] = useState(false);
   const [isMobile, setIsMobile] = useState(true);
+  
+  // 🔥 THE FIX: Scroll-based lazy loading state for Ballpit
+  const [load3D, setLoad3D] = useState(false);
 
   useEffect(() => {
     setMounted(true);
@@ -35,6 +39,25 @@ export default function Footer() {
     window.addEventListener('resize', checkMobile, { passive: true });
     return () => window.removeEventListener('resize', checkMobile);
   }, []);
+
+  // 🔥 THE FIX: Only load Ballpit when user scrolls near the Footer
+  useEffect(() => {
+    if (!footerRef.current || isMobile) return;
+    
+    const observer = new IntersectionObserver(
+      ([entry]) => {
+        if (entry.isIntersecting) {
+          setLoad3D(true);
+          observer.disconnect(); // Stop observing once triggered
+        }
+      },
+      // Trigger load when the footer is 600px away from the viewport
+      { rootMargin: '600px 0px' }
+    );
+    
+    observer.observe(footerRef.current);
+    return () => observer.disconnect();
+  }, [isMobile]);
 
   const whatsappUrl = getWhatsAppUrl(
     '+91 9737275089',
@@ -51,13 +74,14 @@ export default function Footer() {
 
   return (
     <footer
+      ref={footerRef}
       className="bg-[#241714] dark:bg-[#0B0F19] text-[#FFFFFF] pt-20 pb-8 border-t border-[#4B2E2B] dark:border-[#1E293B] relative overflow-hidden transition-colors duration-300 min-h-[460px] z-10"
       role="contentinfo"
       suppressHydrationWarning
     >
-      {/* 3D Ballpit completely bypassed on mobile */}
-      {mounted && !isMobile && (
-        <div className="absolute inset-0 z-0 opacity-80 pointer-events-none">
+      {/* 🔥 THE FIX: Strictly Scroll-Triggered on Desktop, Bypassed on Mobile */}
+      {mounted && !isMobile && load3D && (
+        <div className="absolute inset-0 z-0 opacity-80 pointer-events-none animate-fade-in transition-opacity duration-1000">
           <Ballpit
             count={130}
             gravity={0}

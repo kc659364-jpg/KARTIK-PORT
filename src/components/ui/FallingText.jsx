@@ -128,6 +128,9 @@ const FallingText = ({
     let lastBounciness = null;
     const pointer = { x: 0, y: 0, vx: 0, vy: 0, time: 0 };
 
+    // Mobile check to prevent heavy pointer events
+    const isTouchDevice = window.matchMedia('(pointer: coarse)').matches || window.innerWidth < 768;
+
     const local = event => {
       const box = container.getBoundingClientRect();
       return { x: event.clientX - box.left - container.clientLeft, y: event.clientY - box.top - container.clientTop };
@@ -156,7 +159,6 @@ const FallingText = ({
         piece.dx = x;
         piece.dy = y;
         piece.da = angle;
-        // Fixed Syntax Error Here
         piece.element.style.transform = `translate3d(${(x - piece.w / 2).toFixed(2)}px, ${(y - piece.h / 2).toFixed(2)}px, 0) rotate(${angle.toFixed(4)}rad)`;
       }
     };
@@ -229,8 +231,13 @@ const FallingText = ({
         return { x: rect.left - originX, y: rect.top - originY, w: rect.width, h: rect.height };
       });
       block.style.minHeight = `${block.offsetHeight}px`;
-      const isMobile = typeof window !== 'undefined' && window.innerWidth < 768;
-      const world = Matter.Engine.create({ enableSleeping: true, positionIterations: isMobile ? 2 : 10, velocityIterations: isMobile ? 2 : 8 });
+      
+      const world = Matter.Engine.create({ 
+        enableSleeping: true, 
+        positionIterations: isTouchDevice ? 2 : 10, 
+        velocityIterations: isTouchDevice ? 2 : 8 
+      });
+      
       world.gravity.y = clamp(s.gravity, -3, 4) * 1.4;
       walls = [
         Matter.Bodies.rectangle(0, 0, 10000, WALL, { isStatic: true, friction: 0.8 }),
@@ -275,18 +282,9 @@ const FallingText = ({
         element.style.margin = '0';
         element.style.transform = `translate3d(${rect.x}px, ${rect.y}px, 0)`;
         return {
-          element,
-          body,
-          w: rect.w,
-          h: rect.h,
-          x0: rect.x,
-          y0: rect.y,
-          px: body.position.x,
-          py: body.position.y,
-          pa: 0,
-          dx: body.position.x,
-          dy: body.position.y,
-          da: 0,
+          element, body, w: rect.w, h: rect.h, x0: rect.x, y0: rect.y,
+          px: body.position.x, py: body.position.y, pa: 0,
+          dx: body.position.x, dy: body.position.y, da: 0,
           at: s.order === 'together' ? 0 : rank * Math.max(0, s.stagger),
           released: false
         };
@@ -328,7 +326,6 @@ const FallingText = ({
       const order = [...pieces].sort((a, b) => a.body.position.y - b.body.position.y);
       const animations = order.map((piece, index) => {
         const angle = Math.atan2(Math.sin(piece.body.angle), Math.cos(piece.body.angle));
-        // Fixed Syntax Error Here
         const from = `translate3d(${(piece.body.position.x - piece.w / 2).toFixed(2)}px, ${(piece.body.position.y - piece.h / 2).toFixed(2)}px, 0) rotate(${angle.toFixed(4)}rad)`;
         const to = `translate3d(${piece.x0}px, ${piece.y0}px, 0) rotate(0rad)`;
         piece.element.style.transform = to;
@@ -492,11 +489,14 @@ const FallingText = ({
     });
     resizeObserver.observe(container);
 
-    container.addEventListener('pointerenter', onEnter);
-    container.addEventListener('pointerleave', onLeave);
+    // BIND EVENTS CONDITIONALLY - block heavy pointermath on mobile scroll
+    if (!isTouchDevice) {
+      container.addEventListener('pointerenter', onEnter);
+      container.addEventListener('pointerleave', onLeave);
+      container.addEventListener('pointermove', onMove);
+    }
     container.addEventListener('click', onClick);
     container.addEventListener('pointerdown', onDown);
-    container.addEventListener('pointermove', onMove);
     container.addEventListener('pointerup', onUp);
     container.addEventListener('pointercancel', onUp);
 
@@ -512,11 +512,13 @@ const FallingText = ({
       cancelled = true;
       observer?.disconnect();
       resizeObserver.disconnect();
-      container.removeEventListener('pointerenter', onEnter);
-      container.removeEventListener('pointerleave', onLeave);
+      if (!isTouchDevice) {
+        container.removeEventListener('pointerenter', onEnter);
+        container.removeEventListener('pointerleave', onLeave);
+        container.removeEventListener('pointermove', onMove);
+      }
       container.removeEventListener('click', onClick);
       container.removeEventListener('pointerdown', onDown);
-      container.removeEventListener('pointermove', onMove);
       container.removeEventListener('pointerup', onUp);
       container.removeEventListener('pointercancel', onUp);
       phase = 'idle';

@@ -9,6 +9,7 @@ import { getWhatsAppUrl } from '@/lib/utils';
 import { prefersReducedMotion } from '@/lib/animations';
 import { useTheme } from '@/context/ThemeContext';
 
+// Dynamic import with SSR disabled
 const GridScan = dynamic(() => import('@/components/ui/GridScan'), { ssr: false });
 
 export default function Contact() {
@@ -19,6 +20,9 @@ export default function Contact() {
   
   const [mounted, setMounted] = useState(false);
   const [isMobile, setIsMobile] = useState(true);
+  
+  // 🔥 THE FIX: Scroll-based lazy loading state for 3D background
+  const [load3D, setLoad3D] = useState(false);
 
   useEffect(() => {
     setMounted(true);
@@ -27,6 +31,25 @@ export default function Contact() {
     window.addEventListener('resize', checkMobile, { passive: true });
     return () => window.removeEventListener('resize', checkMobile);
   }, []);
+
+  // 🔥 THE FIX: Only load GridScan when user scrolls near the Contact section
+  useEffect(() => {
+    if (!sectionRef.current || isMobile) return;
+    
+    const observer = new IntersectionObserver(
+      ([entry]) => {
+        if (entry.isIntersecting) {
+          setLoad3D(true);
+          observer.disconnect(); // Stop observing once triggered
+        }
+      },
+      // Trigger load when the section is 600px away from the viewport
+      { rootMargin: '600px 0px' }
+    );
+    
+    observer.observe(sectionRef.current);
+    return () => observer.disconnect();
+  }, [isMobile]);
 
   const whatsappUrl = getWhatsAppUrl(
     '+91 9737275089',
@@ -89,9 +112,9 @@ export default function Contact() {
       ref={sectionRef}
       className="bg-[#E8DCCB] dark:bg-[#0B0F19] text-[#241714] dark:text-[#FFFFFF] py-24 sm:py-32 relative overflow-hidden transition-colors duration-300 border-t border-[#D8C7B3] dark:border-[#1E293B]"
     >
-      {/* 3D GridScan bypassed on mobile */}
-      {mounted && !isMobile && (
-        <div className="absolute inset-0 z-0 pointer-events-none opacity-80">
+      {/* 🔥 THE FIX: Strictly Scroll-Triggered on Desktop, Bypassed on Mobile */}
+      {mounted && !isMobile && load3D && (
+        <div className="absolute inset-0 z-0 pointer-events-none opacity-80 animate-fade-in transition-opacity duration-1000">
           <GridScan
             linesColor={isDark ? '#2563EB' : '#4B2E2B'}
             scanColor={isDark ? '#60A5FA' : '#FFFFFF'}
