@@ -32,6 +32,7 @@ export default function Ballpit({
 }) {
   const isMounted = useSyncExternalStore(emptySubscribe, getSnapshot, getServerSnapshot);
   const containerRef = useRef(null);
+  const colorsKey = Array.isArray(colors) ? colors.join(',') : '';
 
   useEffect(() => {
     if (!isMounted) return undefined;
@@ -145,7 +146,10 @@ export default function Ballpit({
       raycaster.ray.intersectPlane(planeZ, mouseWorld);
     };
 
+    let isInView = false;
+
     const handlePointerMove = (e) => {
+      if (!isInView) return;
       updateMouseWorld(e.clientX, e.clientY);
     };
 
@@ -155,7 +159,7 @@ export default function Ballpit({
 
     // Burst click handler
     const handleClick = (e) => {
-      if (clickEffect !== 'burst') return;
+      if (!isInView || clickEffect !== 'burst') return;
       updateMouseWorld(e.clientX, e.clientY);
       const burstOriginX = mouseWorld.x;
       const burstOriginY = mouseWorld.y;
@@ -289,7 +293,6 @@ export default function Ballpit({
       }
     };
 
-    let isInView = false;
     const visibilityObserver = new IntersectionObserver(
       ([entry]) => {
         const wasInView = isInView;
@@ -346,7 +349,7 @@ export default function Ballpit({
     friction,
     wallBounce,
     followCursor,
-    colors,
+    colorsKey,
     minSize,
     maxSize,
     shadows,

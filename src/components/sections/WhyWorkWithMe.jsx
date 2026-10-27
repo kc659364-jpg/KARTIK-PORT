@@ -126,6 +126,14 @@ export default function WhyWorkWithMe() {
   const sectionRef = useRef(null);
   const gridRef = useRef(null);
   const { isDark } = useTheme();
+  const [isMobile, setIsMobile] = useState(false);
+
+  useEffect(() => {
+    const checkMobile = () => setIsMobile(window.innerWidth < 768);
+    checkMobile();
+    window.addEventListener('resize', checkMobile, { passive: true });
+    return () => window.removeEventListener('resize', checkMobile);
+  }, []);
 
   useEffect(() => {
     if (prefersReducedMotion() || !gridRef.current) return;
@@ -183,7 +191,7 @@ export default function WhyWorkWithMe() {
       {/* AeroShards WebGPU Background */}
       <div className="absolute inset-0 z-0 opacity-60">
         <AeroShards
-          count={800}
+          count={isMobile ? 250 : 700}
           shardColor={isDark ? '#2563EB' : '#4B2E2B'}
           accentColor={isDark ? '#3B82F6' : '#784C47'}
           backgroundColor="transparent"
@@ -192,8 +200,8 @@ export default function WhyWorkWithMe() {
           spread={1.5}
           depthOfField={0.8}
           lightMode={!isDark}
-          mouseInteraction={true}
-          pulseOnClick={true}
+          mouseInteraction={!isMobile}
+          pulseOnClick={!isMobile}
         />
       </div>
 

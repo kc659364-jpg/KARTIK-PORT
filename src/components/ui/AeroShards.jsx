@@ -2076,6 +2076,7 @@ export default function AeroShards({
       };
 
       const onMove = event => {
+        if (!state.visible) return;
         const hit = local(event);
         state.inside = hit.inside;
         if (hit.inside) state.pointer = hit.point;

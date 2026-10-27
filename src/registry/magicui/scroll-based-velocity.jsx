@@ -50,12 +50,14 @@ export function ScrollVelocityRow({
 
   useEffect(() => {
     let animId;
+    let isInView = true;
     let lastScrollY = window.scrollY;
     let scrollVelocity = 0;
     let currentX = 0;
     let lastTime = performance.now();
 
     const onScroll = () => {
+      if (!isInView) return;
       const currentScrollY = window.scrollY;
       const deltaY = currentScrollY - lastScrollY;
       lastScrollY = currentScrollY;
@@ -99,13 +101,44 @@ export function ScrollVelocityRow({
         }
       }
 
-      animId = requestAnimationFrame(animate);
+      if (isInView && !document.hidden) {
+        animId = requestAnimationFrame(animate);
+      }
     };
+
+    const container = containerRef.current;
+    let observer;
+    if (container && typeof IntersectionObserver !== 'undefined') {
+      observer = new IntersectionObserver(
+        ([entry]) => {
+          const wasInView = isInView;
+          isInView = entry.isIntersecting;
+          if (isInView && !wasInView && !document.hidden) {
+            lastTime = performance.now();
+            cancelAnimationFrame(animId);
+            animId = requestAnimationFrame(animate);
+          }
+        },
+        { threshold: 0.05 }
+      );
+      observer.observe(container);
+    }
+
+    const onVisibilityChange = () => {
+      if (!document.hidden && isInView) {
+        lastTime = performance.now();
+        cancelAnimationFrame(animId);
+        animId = requestAnimationFrame(animate);
+      }
+    };
+    document.addEventListener('visibilitychange', onVisibilityChange);
 
     animId = requestAnimationFrame(animate);
 
     return () => {
       cancelAnimationFrame(animId);
+      if (observer) observer.disconnect();
+      document.removeEventListener('visibilitychange', onVisibilityChange);
       window.removeEventListener('scroll', onScroll);
     };
   }, [baseVelocity, direction, numCopies]);
@@ -140,6 +173,7 @@ export function ScrollVelocityRow({
         {Array.from({ length: numCopies }).map((_, copyIndex) => (
           <div
             key={copyIndex}
+            aria-hidden={copyIndex > 0 ? 'true' : undefined}
             style={{
               display: 'inline-flex',
               alignItems: 'center',

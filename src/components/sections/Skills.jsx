@@ -96,13 +96,13 @@ export default function Skills() {
         />
       </div>
 
-      <div ref={marqueeRef} className="relative w-screen -ml-[50vw] left-1/2 -mr-[50vw] right-1/2 py-8 overflow-hidden z-10">
+      <div ref={marqueeRef} className="relative w-full max-w-full py-8 overflow-hidden z-10">
         <ScrollVelocityContainer className="w-full">
           <ScrollVelocityRow
             baseVelocity={4}
             direction={1}
             className="flex items-center py-4"
-            numCopies={4}
+            numCopies={windowWidth < 768 ? 2 : 3}
             pauseOnHover={true}
           >
             {skillGroups.map((group) => (

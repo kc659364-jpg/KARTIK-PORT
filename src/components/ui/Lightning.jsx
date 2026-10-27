@@ -530,6 +530,7 @@ const Lightning = ({
     };
 
     const onMove = event => {
+      if (!visible) return;
       const [x, y, inside] = locate(event);
       if (inside && !pointer.inside && pointer.presence < 0.02) {
         pointer.x = x;

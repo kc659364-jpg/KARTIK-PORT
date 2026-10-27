@@ -303,14 +303,38 @@ export default function GridScan({
     scene.add(mesh);
 
     let animationFrameId;
+    let isInView = true;
     const clock = new THREE.Clock();
 
     const animate = () => {
       uniforms.uTime.value = clock.getElapsedTime();
       renderer.render(scene, camera);
-      animationFrameId = requestAnimationFrame(animate);
+      if (isInView && !document.hidden) {
+        animationFrameId = requestAnimationFrame(animate);
+      }
     };
     animate();
+
+    const visibilityObserver = new IntersectionObserver(
+      ([entry]) => {
+        const wasInView = isInView;
+        isInView = entry.isIntersecting;
+        if (isInView && !wasInView && !document.hidden) {
+          cancelAnimationFrame(animationFrameId);
+          animationFrameId = requestAnimationFrame(animate);
+        }
+      },
+      { threshold: 0.05 }
+    );
+    visibilityObserver.observe(container);
+
+    const onVisibilityChange = () => {
+      if (!document.hidden && isInView) {
+        cancelAnimationFrame(animationFrameId);
+        animationFrameId = requestAnimationFrame(animate);
+      }
+    };
+    document.addEventListener('visibilitychange', onVisibilityChange);
 
     const handleResize = () => {
       if (!container) return;
@@ -326,6 +350,7 @@ export default function GridScan({
     let handleMouseMove;
     if (interactive || parallax > 0) {
       handleMouseMove = (e) => {
+        if (!isInView) return;
         const rect = container.getBoundingClientRect();
         const nx = ((e.clientX - rect.left) / rect.width) * 2 - 1;
         const ny = -(((e.clientY - rect.top) / rect.height) * 2 - 1);
@@ -336,6 +361,8 @@ export default function GridScan({
 
     return () => {
       cancelAnimationFrame(animationFrameId);
+      visibilityObserver.disconnect();
+      document.removeEventListener('visibilitychange', onVisibilityChange);
       if (handleMouseMove) {
         window.removeEventListener('mousemove', handleMouseMove);
       }

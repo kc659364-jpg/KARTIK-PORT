@@ -1,5 +1,6 @@
 'use client';
 
+import { useState, useEffect } from 'react';
 import dynamic from 'next/dynamic';
 import { useTheme } from '@/context/ThemeContext';
 
@@ -7,6 +8,14 @@ const CardSwap = dynamic(() => import('./CardSwap'), { ssr: false });
 
 export default function AboutVisual() {
   const { isDark } = useTheme();
+  const [windowWidth, setWindowWidth] = useState(1200);
+
+  useEffect(() => {
+    const handleResize = () => setWindowWidth(window.innerWidth);
+    handleResize();
+    window.addEventListener('resize', handleResize, { passive: true });
+    return () => window.removeEventListener('resize', handleResize);
+  }, []);
 
   const swapItems = [
     { 
@@ -27,6 +36,10 @@ export default function AboutVisual() {
     }
   ];
 
+  const cardWidth = windowWidth < 480 ? 300 : windowWidth < 768 ? 350 : windowWidth < 1024 ? 440 : 540;
+  const cardHeight = windowWidth < 480 ? 320 : windowWidth < 768 ? 360 : windowWidth < 1024 ? 440 : 520;
+  const cardGap = windowWidth < 640 ? 32 : 55;
+
   return (
     <div className="relative w-full max-w-[460px] mx-auto h-[400px] sm:h-[450px] lg:h-[480px] mb-8 lg:mb-0 flex items-center justify-center">
       
@@ -39,14 +52,14 @@ export default function AboutVisual() {
       </div>
 
       {/* CardSwap Animation Component */}
-      <div className="w-full h-full pt-8">
+      <div className="w-full h-full pt-8 flex items-center justify-center">
         <CardSwap
           items={swapItems}
-          width={560}            // Size bada kar diya red line tak match karne ke liye
-          height={540}           // Height badha di hai
-          skewAmount={0}         // Tilt hata diya, ab ekdum straight (face to face) dikhega
-          cardDistance={55}      // Stacked cards ke beech ka horizontal gap adjust kiya
-          verticalDistance={55}  // Stacked cards ke beech ka vertical gap adjust kiya
+          width={cardWidth}
+          height={cardHeight}
+          skewAmount={0}
+          cardDistance={cardGap}
+          verticalDistance={cardGap}
           theme={isDark ? 'dark' : 'light'} 
           delay={3500}       
         />

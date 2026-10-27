@@ -339,9 +339,12 @@ export default function PaperCrumple({
     );
 
     let lastTime = performance.now();
+    let isInView = true;
 
     const animateLoop = (time) => {
-      animationFrameId = requestAnimationFrame(animateLoop);
+      if (isInView && !document.hidden) {
+        animationFrameId = requestAnimationFrame(animateLoop);
+      }
       const dt = constrain((time - lastTime) / 1000, 0.001, 0.05);
       lastTime = time;
 
@@ -388,11 +391,33 @@ export default function PaperCrumple({
       renderer.render(scene, camera);
     };
 
+    const visibilityObserver = new IntersectionObserver(([entry]) => {
+      const wasInView = isInView;
+      isInView = entry.isIntersecting;
+      if (isInView && !wasInView && !document.hidden) {
+        lastTime = performance.now();
+        cancelAnimationFrame(animationFrameId);
+        animationFrameId = requestAnimationFrame(animateLoop);
+      }
+    });
+    visibilityObserver.observe(container);
+
+    const onVisibilityChange = () => {
+      if (!document.hidden && isInView) {
+        lastTime = performance.now();
+        cancelAnimationFrame(animationFrameId);
+        animationFrameId = requestAnimationFrame(animateLoop);
+      }
+    };
+    document.addEventListener('visibilitychange', onVisibilityChange);
+
     animateLoop(performance.now());
 
     return () => {
       disposed = true;
       cancelAnimationFrame(animationFrameId);
+      visibilityObserver.disconnect();
+      document.removeEventListener('visibilitychange', onVisibilityChange);
       resizeObserver.disconnect();
       canvasEl.removeEventListener('pointerdown', onPointerDown);
       canvasEl.removeEventListener('pointermove', onPointerMove);

@@ -2,6 +2,9 @@
 
 import React, { useEffect, useRef, useState } from 'react';
 
+// Global shared cache for icon image elements to avoid duplicate network downloads
+const iconImageCache = new Map();
+
 /**
  * Interactive 3D Icon Cloud component
  * Projects icons onto a rotating 3D sphere using HTML5 Canvas.
@@ -11,59 +14,61 @@ import React, { useEffect, useRef, useState } from 'react';
  * @param {string[]} props.images - Array of image URLs to render in the cloud
  * @param {number} [props.radius=80] - Radius of the 3D sphere
  * @param {number} [props.size=220] - Canvas width and height
+ * @param {boolean} [props.active=true] - Whether to actively run the animation loop
  */
-export function IconCloud({ images = [], radius = 75, size = 200 }) {
+export function IconCloud({ images = [], radius = 75, size = 200, active = true }) {
   const canvasRef = useRef(null);
   const [loadedImages, setLoadedImages] = useState([]);
 
-  // Preload all icon images
+  // Preload and cache icon images
   useEffect(() => {
     if (!images || images.length === 0) return;
 
     let isMounted = true;
     const loaded = [];
+    let pending = images.length;
+
+    const checkComplete = () => {
+      if (pending === 0 && isMounted) {
+        setLoadedImages(images.map((src) => iconImageCache.get(src)).filter(Boolean));
+      }
+    };
 
     images.forEach((src) => {
+      if (iconImageCache.has(src)) {
+        pending -= 1;
+        checkComplete();
+        return;
+      }
+
       const img = new Image();
       img.crossOrigin = 'anonymous';
       img.src = src;
 
       img.onload = () => {
-        if (!isMounted) return;
-        loaded.push(img);
-        if (loaded.length === images.length) {
-          setLoadedImages([...loaded]);
-        }
+        iconImageCache.set(src, img);
+        pending -= 1;
+        checkComplete();
       };
 
       img.onerror = () => {
-        // Fallback: try without double slug if simpleicons
         const singleSlug = src.replace(/\/([^/]+)\/\1$/, '/$1');
         if (singleSlug !== src) {
           const fallbackImg = new Image();
           fallbackImg.crossOrigin = 'anonymous';
           fallbackImg.src = singleSlug;
           fallbackImg.onload = () => {
-            if (!isMounted) return;
-            loaded.push(fallbackImg);
-            if (loaded.length === images.length) {
-              setLoadedImages([...loaded]);
-            }
+            iconImageCache.set(src, fallbackImg);
+            pending -= 1;
+            checkComplete();
           };
           fallbackImg.onerror = () => {
-            if (!isMounted) return;
-            // Still register so cloud draws available icons
-            loaded.push(null);
-            if (loaded.length === images.length) {
-              setLoadedImages([...loaded]);
-            }
+            pending -= 1;
+            checkComplete();
           };
         } else {
-          if (!isMounted) return;
-          loaded.push(null);
-          if (loaded.length === images.length) {
-            setLoadedImages([...loaded]);
-          }
+          pending -= 1;
+          checkComplete();
         }
       };
     });
@@ -86,6 +91,7 @@ export function IconCloud({ images = [], radius = 75, size = 200 }) {
     let rotationY = 0;
     let targetSpeedX = 0.006;
     let targetSpeedY = 0.008;
+    let isInView = true;
 
     const activeIcons = loadedImages.filter(Boolean);
     const count = activeIcons.length;
@@ -117,10 +123,11 @@ export function IconCloud({ images = [], radius = 75, size = 200 }) {
       targetSpeedY = 0.008;
     };
 
-    canvas.addEventListener('mousemove', handleMouseMove);
+    canvas.addEventListener('mousemove', handleMouseMove, { passive: true });
     canvas.addEventListener('mouseleave', handleMouseLeave);
 
     const render = () => {
+      if (!ctx || !canvas) return;
       ctx.clearRect(0, 0, canvas.width, canvas.height);
 
       rotationX += targetSpeedX;
@@ -138,11 +145,9 @@ export function IconCloud({ images = [], radius = 75, size = 200 }) {
       // Transform, sort by depth (z) to render back-to-front
       const projected = points
         .map((p) => {
-          // Rotate around Y
           let x1 = p.x * cosY - p.z * sinY;
           let z1 = p.z * cosY + p.x * sinY;
 
-          // Rotate around X
           let y2 = p.y * cosX - z1 * sinX;
           let z2 = z1 * cosX + p.y * sinX;
 
@@ -169,7 +174,6 @@ export function IconCloud({ images = [], radius = 75, size = 200 }) {
         ctx.globalAlpha = p.alpha;
 
         const half = p.iconSize / 2;
-        // Draw soft circular background pill behind icon for contrast
         ctx.fillStyle = 'rgba(255, 255, 255, 0.9)';
         ctx.beginPath();
         ctx.arc(p.screenX, p.screenY, half + 3, 0, Math.PI * 2);
@@ -187,24 +191,50 @@ export function IconCloud({ images = [], radius = 75, size = 200 }) {
             p.iconSize,
             p.iconSize
           );
-        } catch (e) {
+        } catch {
           // Ignore occasional draw error
         }
 
         ctx.restore();
       });
 
-      animationFrameId = requestAnimationFrame(render);
+      if (active && isInView && !document.hidden) {
+        animationFrameId = requestAnimationFrame(render);
+      }
     };
 
+    let observer;
+    if (typeof IntersectionObserver !== 'undefined') {
+      observer = new IntersectionObserver(([entry]) => {
+        const wasInView = isInView;
+        isInView = entry.isIntersecting;
+        if (isInView && !wasInView && active && !document.hidden) {
+          cancelAnimationFrame(animationFrameId);
+          animationFrameId = requestAnimationFrame(render);
+        }
+      });
+      observer.observe(canvas);
+    }
+
+    const onVisibility = () => {
+      if (!document.hidden && active && isInView) {
+        cancelAnimationFrame(animationFrameId);
+        animationFrameId = requestAnimationFrame(render);
+      }
+    };
+    document.addEventListener('visibilitychange', onVisibility);
+
+    // Initial render frame to draw static preview
     render();
 
     return () => {
       cancelAnimationFrame(animationFrameId);
+      if (observer) observer.disconnect();
+      document.removeEventListener('visibilitychange', onVisibility);
       canvas.removeEventListener('mousemove', handleMouseMove);
       canvas.removeEventListener('mouseleave', handleMouseLeave);
     };
-  }, [loadedImages, radius]);
+  }, [loadedImages, radius, active]);
 
   return (
     <div

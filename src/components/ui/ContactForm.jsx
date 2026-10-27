@@ -15,8 +15,8 @@ const SERVICES_OPTIONS = [
 ];
 
 const BUDGET_OPTIONS = [
-  'Under $500 / ₹40,000',
-  '$500 – $1,500 / ₹40k – ₹1.2L',
+  'Under $100 / ₹9,000',
+  '$200 – $500 / ₹18k – ₹45L',
   '$1,500 – $3,000 / ₹1.2L – ₹2.5L',
   '$3,000+ / ₹2.5L+',
   'Flexible / Let’s Discuss',

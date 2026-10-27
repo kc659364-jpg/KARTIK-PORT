@@ -1,12 +1,16 @@
 'use client';
 
 import dynamic from 'next/dynamic';
+import { useState, useEffect } from 'react';
 import { Mail, MessageSquare, ArrowUp } from 'lucide-react';
 import { GithubIcon, LinkedinIcon } from '@/components/ui/Icons';
 import { scrollToSection, getWhatsAppUrl } from '@/lib/utils';
 import { useTheme } from '@/context/ThemeContext';
 
 const Ballpit = dynamic(() => import('@/components/ui/Ballpit'), { ssr: false });
+
+const DARK_BALL_COLORS = ['#2563EB', '#1D4ED8', '#94A3B8', '#FFFFFF'];
+const LIGHT_BALL_COLORS = ['#4B2E2B', '#E8DCCB', '#241714', '#FFFFFF'];
 
 const NAV_LINKS = [
   { label: 'Home', target: 'hero' },
@@ -20,6 +24,14 @@ const NAV_LINKS = [
 export default function Footer() {
   const currentYear = 2026;
   const { isDark } = useTheme();
+  const [isMobile, setIsMobile] = useState(false);
+
+  useEffect(() => {
+    const checkMobile = () => setIsMobile(window.innerWidth < 768);
+    checkMobile();
+    window.addEventListener('resize', checkMobile, { passive: true });
+    return () => window.removeEventListener('resize', checkMobile);
+  }, []);
 
   const whatsappUrl = getWhatsAppUrl(
     '+91 9737275089',
@@ -36,23 +48,19 @@ export default function Footer() {
 
   return (
     <footer
-      className="bg-[#241714] dark:bg-[#0B0F19] text-[#FFFFFF] pt-20 pb-8 border-t border-[#4B2E2B] dark:border-[#1E293B] relative overflow-hidden transition-colors duration-300"
+      className="bg-[#241714] dark:bg-[#0B0F19] text-[#FFFFFF] pt-20 pb-8 border-t border-[#4B2E2B] dark:border-[#1E293B] relative overflow-hidden transition-colors duration-300 min-h-[460px] z-10"
       role="contentinfo"
       suppressHydrationWarning
     >
       {/* 3D Ballpit Interactive Background */}
-      <div className="absolute inset-0 z-0 opacity-80">
+      <div className="absolute inset-0 z-0 opacity-80 pointer-events-none">
         <Ballpit
-          count={150}
+          count={isMobile ? 40 : 130}
           gravity={0}
           friction={0.9975}
           wallBounce={0.95}
-          followCursor={true}
-          colors={
-            isDark
-              ? ['#2563EB', '#1D4ED8', '#94A3B8', '#FFFFFF']
-              : ['#4B2E2B', '#E8DCCB', '#241714', '#FFFFFF']
-          }
+          followCursor={!isMobile}
+          colors={isDark ? DARK_BALL_COLORS : LIGHT_BALL_COLORS}
           minSize={0.4}
           maxSize={1.2}
           shadows={0.6}

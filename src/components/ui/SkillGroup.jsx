@@ -1,6 +1,6 @@
 'use client';
 
-import React, { useMemo } from 'react';
+import React, { useMemo, useState } from 'react';
 import { Sparkles } from 'lucide-react';
 import { IconCloud } from '@/registry/magicui/icon-cloud';
 import { useTheme } from '@/context/ThemeContext';
@@ -48,6 +48,7 @@ const CATEGORY_COMPLEMENTS = {
 export default function SkillGroup({ group }) {
   const { id, title, skills = [] } = group;
   const { isDark } = useTheme();
+  const [isHovered, setIsHovered] = useState(false);
 
   const groupIconUrls = useMemo(() => {
     const slugs = [];
@@ -66,7 +67,7 @@ export default function SkillGroup({ group }) {
       }
     });
 
-    // Sirf slug return kar rahe hain, isse actual brand colors fetch honge
+    // Return simpleicons cdn urls
     return slugs.map((slug) => `https://cdn.simpleicons.org/${slug}`);
   }, [id, skills]);
 
@@ -76,6 +77,10 @@ export default function SkillGroup({ group }) {
       role="region"
       aria-label={`${title} skills`}
       tabIndex={0}
+      onMouseEnter={() => setIsHovered(true)}
+      onMouseLeave={() => setIsHovered(false)}
+      onFocus={() => setIsHovered(true)}
+      onBlur={() => setIsHovered(false)}
     >
       <div className="absolute inset-6 flex flex-col justify-between opacity-100 scale-100 transition-all duration-300 ease-out group-hover:opacity-0 group-hover:scale-95 group-hover:pointer-events-none">
         <div>
@@ -109,7 +114,7 @@ export default function SkillGroup({ group }) {
         <span className="text-[11px] font-semibold tracking-widest uppercase text-[#241714] dark:text-[#FFFFFF] bg-[#FFFFFF]/90 dark:bg-[#111827]/90 px-3 py-1 rounded-full border border-[#4B2E2B]/30 dark:border-[#2563EB]/40 mb-1 shadow-sm">
           {title}
         </span>
-        <IconCloud images={groupIconUrls} radius={65} size={220} />
+        <IconCloud images={groupIconUrls} radius={65} size={220} active={isHovered} />
       </div>
     </div>
   );
