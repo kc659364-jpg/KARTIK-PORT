@@ -189,11 +189,11 @@ export default function Navbar() {
         {/* Mobile Menu Drawer Overlay */}
         {isMobileMenuOpen && (
           <div
-            className="fixed inset-0 bg-black/60 backdrop-blur-sm z-50 md:hidden animate-fade-in"
+            className="fixed inset-0 bg-[#E8DCCB]/60 dark:bg-[#0B0F19]/80 backdrop-blur-md z-50 md:hidden animate-fade-in"
             onClick={() => setIsMobileMenuOpen(false)}
           >
             <div
-              className="absolute top-0 right-0 w-[85vw] max-w-[320px] h-screen bg-[#FFFFFF] dark:bg-[#0B0F19] p-6 sm:p-8 pt-6 flex flex-col shadow-2xl border-l border-[#E8DCCB] dark:border-[#94A3B8]/20"
+              className="absolute top-0 right-0 w-[85vw] max-w-[320px] h-[100dvh] bg-[#FFFFFF] dark:bg-[#0B0F19] p-6 pb-8 sm:p-8 sm:pb-10 pt-6 flex flex-col shadow-2xl border-l border-[#E8DCCB] dark:border-[#94A3B8]/20"
               onClick={(e) => e.stopPropagation()}
               role="dialog"
               aria-label="Mobile navigation menu"
@@ -244,14 +244,16 @@ export default function Navbar() {
               </ul>
 
               {/* CTA in mobile menu */}
-              <button
-                type="button"
-                className="mt-6 w-full font-body text-sm uppercase tracking-wider font-semibold text-white bg-[#4B2E2B] dark:bg-[#2563EB] hover:bg-[#38211E] dark:hover:bg-[#1D4ED8] py-4 rounded-xl transition-all shadow-sm dark:shadow-[#2563EB]/25"
-                onClick={() => handleNavClick('contact')}
-                suppressHydrationWarning
-              >
-                Let&apos;s Talk
-              </button>
+              <div className="mt-6 shrink-0">
+                <button
+                  type="button"
+                  className="w-full font-body text-sm uppercase tracking-wider font-semibold text-white bg-[#4B2E2B] dark:bg-[#2563EB] hover:bg-[#38211E] dark:hover:bg-[#1D4ED8] py-4 rounded-xl transition-all shadow-sm dark:shadow-[#2563EB]/25"
+                  onClick={() => handleNavClick('contact')}
+                  suppressHydrationWarning
+                >
+                  Let&apos;s Talk
+                </button>
+              </div>
             </div>
           </div>
         )}
