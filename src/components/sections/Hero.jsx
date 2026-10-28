@@ -317,7 +317,7 @@ export default function Hero() {
 
             <div 
               ref={scrollWrapperRef} 
-              className="lg:col-span-5 relative w-full h-[350px] sm:h-[450px] lg:h-[550px] flex items-center justify-center order-first lg:order-last"
+              className="lg:col-span-5 relative w-full h-[350px] sm:h-[450px] lg:h-[550px] flex items-center justify-center order-first lg:order-last overflow-hidden"
             >
               <div
                 ref={profileImageRef}
@@ -373,6 +373,13 @@ export default function Hero() {
                   />
                 </div>
               </div>
+
+              {/* Added: Bottom Fade Overlay for Smooth Blending in Mobile & Desktop */}
+              <div 
+                className={`absolute bottom-0 left-0 w-full h-24 sm:h-32 z-20 pointer-events-none bg-gradient-to-t ${
+                  isDark ? 'from-[#0B0F19] to-transparent' : 'from-[#FFFFFF] to-transparent'
+                }`}
+              />
             </div>
           </div>
         </div>
